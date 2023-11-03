@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orkut - Cadastro</title>
+    <link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/register.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <img src="/logo.png" alt="">
+
+            <ul>
+                <li><a href="/Login">Login</a></li>
+                <li><a href="/About">Sobre</a></li>
+            </ul>
+        </nav>
+    </header><!-- Orkut header -->
+
+    <main>
+        <!-- Advice banner -->
+        <% if(msg != "") { %>
+        <div class="warning">
+            <span><%= msg %></span>
+        </div>
+        <% }%>
+
+        <section class="register">
+            <h4>Faça seu cadastro no <pBold>Orkut Flat!</pBold> agora mesmo!</h4>
+
+            <form action="/doRegister" method="post">
+                <div class="grid">
+                    <div class="grid-items"style="text-align: right; padding-right: 15px;" id="colorize"><span><warn>*</warn>Nome:</span></div>
+                    <div class="grid-items" id="colorize"><input type="text" name="name" id="name" required /></div>
+
+                    <div class="grid-items"style="text-align: right; padding-right: 15px;" id="colorize-weak"><span><warn>*</warn>Sobrenome:</span></div>
+                    <div class="grid-items" id="colorize-weak"><input type="text" name="lastname" id="lastname" required /></div>
+
+                    <div class="grid-items"style="text-align: right; padding-right: 15px;" id="colorize"><span><warn>*</warn>E-mail:</span></div>
+                    <div class="grid-items" id="colorize"><input type="email" name="email" id="email" required /></div>
+                    
+                    <div class="grid-items"style="text-align: right; padding-right: 15px;" id="colorize-weak"><span><warn>*</warn>Senha:</span></div>
+                    <div class="grid-items" id="colorize-weak"><input type="password" name="password" id="password" required /></div>
+
+                    <div class="grid-items"style="text-align: right; padding-right: 15px;" id="colorize"><span><warn>*</warn>Confirmar Senha:</span></div>
+                    <div class="grid-items" id="colorize"><input type="password" name="passwordc" id="passwordc" required /></div>
+
+                    <div class="grid-items" style="text-align: right; padding-right: 15px;" id="colorize-weak"><span><warn>*</warn>Gênero:</span></div>
+                    <div class="grid-items" id="colorize-weak"><div class="radioch">
+                        <input type="radio" name="radios" id="male" value="0" checked/> Masculino
+                        <input type="radio" name="radios" id="female" value="1" /> Feminino
+                    </div></div>
+
+                    <div class="grid-items"style="text-align: right; padding-right: 15px;" id="colorize"><span><warn>*</warn>Aniversario: </span></div>
+                    <div class="grid-items" id="colorize"><select name="days" id="days" style="width: 50px;" required>
+                        <option value="" disabled selected>Dia</option>
+                        <% for(var i=1;i<32;i++) {
+                            %>
+                        <option value="<%= i %>"><%= i %></option> 
+                        <% } %>
+                    </select>
+                    <select name="Months" id="Months" style="width: 80px;" required>
+                        <option value="" disabled selected>Mês</option>
+                        <% for(item of result) {
+                            %>
+                        <option value="<%= item %>"><%= item %></option> 
+                        <% } %>
+                    </select></div><!-- gender -->
+
+                    <div class="grid-items"style="text-align: right; padding-right: 15px;" id="colorize-weak"><span><warn>*</warn>Ano do aniversario: </span></div>
+                    <div class="grid-items" id="colorize-weak"><select name="year" id="year" style="width: 80px;" required>
+                        <option value="" disabled selected>Ano</option>
+                        <% for(var i=1980;i<2023;i++) {
+                            %>
+                        <option value="<%= i %>"><%= i %></option> 
+                        <% } %>
+                    </select></div><!-- user b. year -->
+
+                </div>
+            
+                <!-- Recaptcha test from google. -->
+                <h5>Pedimos que confirme que você não é um robo.</h5>
+                <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+
+                <button type="submit">Cadastrar</button>
+            </form><!-- Register form -->
+        </section><!-- Register section -->
+    </main><!-- Main page -->
+
+    <!-- Recaptcha test from google. -->
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <script>
+        grecaptcha.ready(function() {
+            grecaptcha.execute('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', {action: 'demo'})
+                .then(function(token) {
+                    // this token will be passed together with your data
+                });
+        });
+    </script>
+</body>
+</html>

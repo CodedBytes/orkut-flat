@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orkut - Login</title>
+    <link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/login.css">
+
+</head>
+<body>
+    <!-- Pagina toda -->
+    <main>
+        <!-- Advice banner -->
+        <% if(msg != "") { %>
+        <div class="warning">
+            <span><%= msg %></span>
+        </div>
+        <% }%>
+
+        <!-- Informação -->
+        <section class="info">
+            <img src="/logo.png" alt="" name="Orkut.net" />
+            <tag>Flat!</tag>
+
+            <p><pBold>Conecta-se</pBold> aos seus amigos e famíliares usando recados e mensagens instantâneas.</p>
+            <p><pBold>Conheça</pBold> novas pessoas através de amigos de seus amigos e comunidades.</p>
+            <p><pBold>Compartilhe</pBold> seus vídeos, fotos e paixões em um só lugar.</p><br><Br>
+
+            <p>O seu <pBold>orkut</pBold> original com um <pBold>design</pBold> flat!</p>
+        </section>
+
+        <!-- Login -->
+        <section class="lWindow">
+            <div class="login">
+                <p>Acesse o <b>Orkut</b> usando sua conta.</p>
+
+                <form action="/Login" method="post">
+                    <label for="email">E-mail:
+                    <input type="email" name="email" id="email" required /></label>
+
+                    <label for="senha">Senha: 
+                    <input type="password" name="password" id="password" required maxlength="16"/></label>
+                    <div class="notcenter" style="margin-left: 20px;">
+                        <input id="cb" name="cb" type="checkbox" style="float: left; margin-top: 5px;">
+                        <div style="margin-left: 25px;">
+                            Salvar as informações neste computador.
+                        </div>
+                    </div>
+                    <span class="small">Não use em computadores publicos[<a href="#">?</a>]</span>
+                    <button type="submit">Login</button>
+                </form>
+                <a href="#">Não consegue acessar sua conta?</a>
+            </div>
+
+            <!-- Register -->
+            <div class="register">
+                <p>Você ainda não é membro?</p>
+                <a href="/Register">ENTRE JÁ</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

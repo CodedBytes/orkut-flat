@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orkut - Home</title>
+    <link rel="stylesheet" href="home.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="left">
+                <a href="/Home"><img src="/logo.png" alt=""></a>
+
+                <ul>
+                    <li><a href="/Home">Início</a></li>
+                    <li><a href="/Scraps">Página de recados</a></li>
+                    <li><a href="/Friends">Amigos</a></li>
+                    <li><a href="/Community">Comunidades</a></li>
+                </ul>
+            </div>
+
+            <div class="right">
+                <span><%= db[0].email %></span>
+                <a href="/Logout">Sair</a>
+            </div>
+        </nav>
+    </header><!-- Orkut header -->
+
+    <main>
+        <section class="left-side">
+            <div class="photo">
+                <img src="<%= db[0].photo %>" alt="" />
+            </div><!-- Profile photo area -->
+            <hr>
+            <div class="info-area">
+                <a href="/Profile?id=<%= db[0].profile_id %>"><%= db[0].first_name %></a><br>
+                
+                <div class="quick">
+                    <% if(db[0].gender == 0) var gender_name = "Masculino"; else var gender_name = "Feminino";%>
+                    <span><%= gender_name %></span><br>
+
+                    <% if(db[0].relationship != "") {%>
+                        <span><%= gender_name %>, <%= db[0].relationship %></span><br>
+                    <% }%>
+
+                    <% if(db[0].city != "") {%>
+                        <span><%= db[0].city %>, </span>
+                    <% }%>
+
+                    <% if(db[0].country != "") {%>
+                        <span><%= db[0].country %>. </span>
+                    <% }%>
+                </div><!-- Quick informations -->
+
+                <div class="edit-profile">
+                    <div class="grid-content">
+                        <img src="/icons/profile_ico.png" alt="" />
+                        <a href="/EditProfile?id=<%= db[0].profile_id %>">editar perfil</a>
+                    </div>
+                </div>
+            </div><!-- Profile info area -->
+
+            <div class="links">
+                <div class="grid">
+                    <div class="grid-content">
+                        <img src="/icons/profile_ico.png" alt="" />
+                        <a href="/Profile?id=<%= db[0].profile_id %>">perfil</a>
+                    </div>
+                    
+                    <div class="grid-content">
+                        <img src="/icons/scraps_ico.png" alt="" />
+                        <a href="/Scraps">recados</a>
+                    </div>
+
+                    <div class="grid-content">
+                        <img src="/icons/photos_ico.png" alt="" />
+                        <a href="/Photos">fotos</a>
+                    </div>
+
+                    <div class="grid-content">
+                        <img src="/icons/videos_ico.png" alt="" />
+                        <a href="/Videos">vídeos</a>
+                    </div>
+
+                    <div class="grid-content">
+                        <img src="/icons/depoiments_ico.png" alt="" />
+                        <a href="/Depoiments">depoimentos</a>
+                    </div><br>
+
+                    <div class="grid-content">
+                        <img src="/icons/options_ico.png" alt="" />
+                        <a href="/Options">opções</a>
+                    </div>
+                </div><!-- grid for links -->
+            </div><!-- Social links -->
+        </section><!-- social links & profile photo -->
+
+        <section class="feed">
+            <div class="text-area">
+                <form action="/makerPost" method="post" name="make-post" id="make-post">
+                    <textarea name="" id="" cols="30" rows="10"></textarea>
+                </form>
+            </div>
+            <div class="buttons">
+                <button type="submit" form="make-post">Postar</button>
+                <button type="reset">Cancelar</button>
+            </div>
+        </section><!-- Social media feed -->
+
+        <section class="rigth-side">
+
+        </section><!-- Friends & community -->
+    </main><!-- Page -->
+</body>
+</html>

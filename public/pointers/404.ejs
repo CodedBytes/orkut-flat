@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orkut - 404</title>
+    <style>
+        :root{
+        --buttons-theme: rgb(81, 81, 212);
+        --buttons-theme-border: rgb(56, 56, 192);
+        }
+
+        @font-face {
+            font-family: bauhaus_normal;
+            src: url(BauhausRegular.ttf);
+        }
+        @font-face {
+            font-family: bauhaus_bold;
+            src: url(BauhausBold.ttf);
+        }
+
+
+        *{
+            margin: 0;
+            padding: 2px;
+            box-sizing: border-box;
+        }
+
+        main .notice{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 680px;
+            height: 420px;
+            position: absolute;
+            margin: auto;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            border-radius: 5px;
+            box-shadow: rgba(17, 17, 17, 0.3) 1px 2px 6px 1px;
+            background-color: rgb(253, 253, 253);
+        }
+
+        main .notice > p{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 25px;
+            width: 530px;
+            margin: 30px 0px;
+        }
+        main .notice > button{
+            width: 130px;
+            padding: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            border: 1px solid rgb(175, 175, 175);
+            border-radius: 15px;
+            color: var(--buttons-theme);
+            font-family: bauhaus_normal;
+            cursor: pointer;
+            transition: 0.1s ease-in;
+            background: rgb(217,217,217);
+            background: linear-gradient(0deg, rgba(217,217,217,1) 5%, rgba(222,222,222,1) 25%, rgba(232,232,232,1) 69%, rgba(255,255,255,1) 83%, rgba(255,255,255,1) 100%);
+            transition: 0.1s ease-in;
+        }
+
+        main .notice > button:hover{
+            border: 1px solid var(--buttons-theme-border);
+            background: var(--buttons-theme);
+            color: white;
+            transition: 0.1s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="notice">
+            <img src="/logo.png" alt="" width="300px" />
+
+            <p>Desculpe mas a pagina que você esta tentando acessar não esta disponivel!</p>
+
+            <button onclick="window.location.href='/Home';">Voltar ao site</button>
+        </div>
+    </main><!-- 404 Page -->
+</body>
+</html>
