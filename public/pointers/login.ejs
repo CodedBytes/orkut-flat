@@ -13,10 +13,15 @@
     <main>
         <!-- Advice banner -->
         <% if(msg != "") { %>
-        <div class="warning">
-            <span><%= msg %></span>
-        </div>
-        <% }%>
+            <div class="warning">
+                <span><%= msg %></span>
+            </div>
+        <% } else { 
+            var normal_msg = "<b>Orkut flat!</b> não tem nenhuma ligação com o orkut original. Ele é apenas um projeto de portifolio."%>
+            <div class="warning">
+                <span><span style="color: black;">Aviso:</span> <%- normal_msg %></span>
+            </div>
+        <%}%>
 
         <!-- Informação -->
         <section class="info">
