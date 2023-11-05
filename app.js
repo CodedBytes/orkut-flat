@@ -3,10 +3,8 @@
 //                      Programado por Joao Victor Segantini.                              //
 //                                 		                                                   //
 /////////////////////////////////////////////////////////////////////////////////////////////
-
 // Variaveis globais.
 var warning = "";
-
 
 // requires
 const express = require("express");
@@ -32,29 +30,80 @@ app.use(express.static(path.join(__dirname, '/public/js')));
 app.use(express.static(path.join(__dirname, '/public/imgs')));
 app.use(express.static(path.join(__dirname, '/public/_files')));
 app.use(express.static(path.join(__dirname, '/public/pointers')));
+app.use(express.static(path.join(__dirname, '/public/ckeditor')));
 
 // Sessão
 app.use(
     session({
-      secret: 'sdjfhlwkehflhfhfhfuwehifghsidhifhezdfvsdf', // Deve ser mantida em segredo
+      secret: 'sdjfhlwkehflhfhfhfuwehifghsidhifhezdfvsdf', // Chave
       resave: false,
       saveUninitialized: true,
+      cookie: {
+        maxAge: 1 * 24 * 60 * 60 * 1000, // Tempo de expiração em milissegundos (1 dia).
+        secure: false, // Defina como true se estiver usando HTTPS
+        httpOnly: true, // Impede acesso ao cookie via JavaScript no navegador
+      }
     })
   );
 
-// Multer configuration for profile saving.
-var storage = multer.diskStorage({
-    destination: (req, file, callBack) => {
-        callBack(null, './public/_files/photos/');// Diretorio para salvar as imagens    
-    },
-    filename: (req, file, callBack) => {// Nome do arquivo.
-        callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
+// Multer guardando imagem de perfil baseado no id do usuario
+function upIMG(id)
+{
+    multer.diskStorage({
+        destination: (req, file, callBack) => {
+            callBack(null, './public/_files/photos/' + id + '/');// Diretorio para salvar as imagens de perfil  
+        },
+        filename: (req, file, callBack) => {// Nome do arquivo.
+            callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        }
+    });
+}
 
-var upload = multer({
-    storage: storage
-});
+// Multer guardando imagem de posts baseado no id do usuario que fez o post
+function upPostIMG(id)
+{
+    multer.diskStorage({
+        destination: (req, file, callBack) => {
+            callBack(null, './public/_files/images/' + id + '/');// Diretorio para salvar as imagens de perfil  
+        },
+        filename: (req, file, callBack) => {// Nome do arquivo.
+            callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        }
+    });
+}
+
+// Multer guardando videos de post baseado no id do usuario que fez o post.
+function upPostVideo(id)
+{
+    multer.diskStorage({
+        destination: (req, file, callBack) => {
+            callBack(null, './public/_files/videos/' + id + '/');// Diretorio para salvar as imagens de perfil  
+        },
+        filename: (req, file, callBack) => {// Nome do arquivo.
+            callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        }
+    });
+}
+
+
+function upImgProfile(id)
+{ 
+    multer({
+        storage: upIMG(id)
+    });
+}
+function upImgPost(id)
+{ 
+    multer({
+        storage: upPostIMG(id)
+    });
+}
+function upVideoPost(id)
+{ 
+    multer({
+        storage: upPostVideo(id)
+    });
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -93,11 +142,40 @@ app.get("/Home",(req,res)=>{
     if (req.session.loggedin) {
 
         // Pegando as informações da db
-        conn.query("SELECT * FROM accounts WHERE email=?",[req.session.email],async (error,results,fields)=>{
+        conn.query("SELECT * FROM accounts WHERE email=?",[req.session.email],(error,results)=>{
             if(error) throw error;
             if(results.length > 0)
             {
-                res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results});
+                // tem q pegar um filtro baseados nos amigos q ele tem. (exibindo posts globais por enquanto).
+                conn.query("SELECT * FROM feed_posts ORDER BY posted_when DESC;",(error, datas)=>{
+                    if(error)throw error;
+                    if(datas.length > 0)
+                    {
+                        conn.query("SELECT * FROM post_comments ORDER BY posted_when;",(error, comments)=>{
+                            if(error) throw error;
+                            if(comments.length > 0)
+                            {
+                                res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments});
+                                warning = "";
+                            }
+                            else
+                            {
+                                res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments});
+                                warning = "";
+                            }
+                        });
+                    }
+                    else
+                    {
+                        res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, no_posts: true, msg: warning});
+                        warning = "";
+                    }
+                });
+            }
+            else
+            {
+                warning = "Aconteceu um erro inesperado com o sistema, por favor tente fazer login mais tarde.";
+                res.redirect("/Login");
             }
         });
     } else {
@@ -145,7 +223,7 @@ app.post("/Login",(req,res)=>{
                     req.session.loggedin = true;
                     req.session.email = results[0].email;
 
-                    if(cb) {req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;}
+                    if(cb) {req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;}// 30 dias até deslogar.
 
                     res.redirect("/Home");
                 } else {
@@ -203,7 +281,14 @@ app.post("/doRegister",(req,res)=>{
                             conn.query("INSERT INTO accounts (profile_id, first_name, last_name, email, password, gender, birth_day, birth_month, birth_year, photo)"
                             + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",[profile_id, name, lastname, email, hash, radios, days, months, year, '/photos/default_photo.png'],(error,results,fields)=>{
                                 if(error) throw error;
-                                if(results.affectedRows > 0){ erro = ""; res.redirect("/Home"); }
+                                if(results.affectedRows > 0)
+                                { 
+                                    // Cookies
+                                    req.session.loggedin = true;
+                                    req.session.email = results[0].email;
+                                    erro = ""; 
+                                    res.redirect("/Home"); 
+                                }
                                 else { erro = "Não foi possivel fazer o cadastro, entre em contato com o suporte."; res.redirect("/Register"); }
                             });
                         });
@@ -214,6 +299,96 @@ app.post("/doRegister",(req,res)=>{
     } else { warning = "As senhas que você digitou não são iguai sou sua senha é muito grande."; res.redirect("/Register");}
 });
 
+
+// Post no feed
+app.post("/makePost", (req, res)=>{
+    // pegando texto e email
+    var text = req.body.postcontent;
+    var email = req.session.email;
+
+    // hora atual
+    const date = new Date();
+    const hour = date.getHours();
+    const min = date.getMinutes();
+
+    // Verificando se o texto esta vazio ou não
+    if(text.length > 0)
+    {
+        // pegando o nome do usuario e a foto dele.
+        conn.query("SELECT * FROM accounts WHERE email = ?;",[email],(error, result)=>{
+            if(error)throw error;
+            if(result.length > 0)
+            {
+                // Salva o post
+                conn.query("INSERT INTO feed_posts (from_user, name,`text`, posted_when, user_photo, liked) VALUES (?, ?, ?, ?, ?, ?);",
+                [result[0].profile_id, result[0].first_name,text, hour+':'+min, result[0].photo, 0],(error, results)=>{
+                    if(error)throw error;
+                    if(results.affectedRows > 0)
+                    {
+                        warning = "";
+                        res.redirect("/Home");
+                    }
+                    else
+                    {
+                        warning = "Houve ao realizar o post, volte a fazer o post mais tarde.";
+                        res.redirect("/Home");
+                    }
+                });
+            }
+            else
+            {
+                warning = "Houve ao realizar o post, volte a fazer o post mais tarde.";
+                res.redirect("/Home");
+            }
+        });
+    }else { warning = "Você precisa digitar um texto para postar."; res.redirect("/Home");}
+});
+
+// Comentando o post
+app.post("/commentPost",(req, res)=>{
+    // pegando texto e email
+    var post_id = req.query.q;
+    var text = req.body['response-' + post_id];
+    var email = req.session.email;
+
+
+    // hora atual
+    const date = new Date();
+    const hour = date.getHours();
+    const min = date.getMinutes();
+
+    // Verificando se o texto esta vazio ou não
+    if(text.length > 0)
+    {
+        // pegando o nome do usuario e a foto dele.
+        conn.query("SELECT * FROM accounts WHERE email = ?;",[email],(error, result)=>{
+            if(error)throw error;
+            if(result.length > 0)
+            {
+                // Salva o post
+                conn.query("INSERT INTO post_comments (postID , user_id, name,`text`, posted_when, user_photo, likes) VALUES (?, ?, ?, ?, ?, ?, ?);",
+                [post_id, result[0].profile_id, result[0].first_name, text, hour+':'+min, result[0].photo, 0],(error, results)=>{
+                    if(error)throw error;
+                    if(results.affectedRows > 0)
+                    {
+                        warning = "";
+                        res.redirect("/Home");
+                    }
+                    else
+                    {
+                        warning = "Houve ao realizar o post, volte a fazer o post mais tarde.";
+                        res.redirect("/Home");
+                    }
+                });
+            }
+            else
+            {
+                warning = "Houve ao realizar o post, volte a fazer o post mais tarde.";
+                res.redirect("/Home");
+            }
+        });
+    }else { warning = "Você precisa digitar um texto para postar."; res.redirect("/Home");}
+});
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////   404 Page   /////////////////////////////////////

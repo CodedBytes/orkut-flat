@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orkut - Home</title>
     <link rel="stylesheet" href="home.css">
+    <script src="/ckeditor.js"></script>
 </head>
 <body>
     <header>
@@ -97,20 +98,185 @@
         </section><!-- social links & profile photo -->
 
         <section class="feed">
+            <!-- Advice banner -->
+            <% if(msg != "") { %>
+                <div class="warning">
+                    <span><span style="color: rgb(255, 255, 22); font-size: 17px;">Aviso:</span> <%= msg %></span>
+                </div>
+            <% } else { 
+                var normal_msg = "Orkut Flat! - Versão de portfolio v0.2." %>
+                <div class="warning">
+                    <span><span style="color: rgb(255, 255, 22); font-size: 17px;">Aviso:</span> <%= normal_msg %></span>
+                </div>
+            <%}%>
+
             <div class="text-area">
-                <form action="/makerPost" method="post" name="make-post" id="make-post">
-                    <textarea name="" id="" cols="30" rows="10"></textarea>
+                <form action="/makePost" method="post" name="make-post" id="make-post">
+                    <textarea name="postcontent" id="postcontent" cols="30" rows="10" required></textarea>
                 </form>
-            </div>
-            <div class="buttons">
-                <button type="submit" form="make-post">Postar</button>
-                <button type="reset">Cancelar</button>
-            </div>
-        </section><!-- Social media feed -->
+                
+                <div class="buttons" id="buttons" style="display: none;">
+                    <button type="submit" form="make-post">Postar</button>
+                    <button onclick="CKEDITOR.instances.postcontent.setData( '', function() { this.updateElement(); } );">Cancelar</button>
+                </div>
+            </div><!-- post area -->
 
-        <section class="rigth-side">
+            <div class="social-feed">
+                <h2>Feed principal</h2>
 
+                <% if(no_posts) { %>
+                <div class="no-scraps">
+                    <p>Adicione amigos ou faça um post usando emojis, imagens, vídeos, #hashtags, e muito mais!</p>
+                </div>
+
+                <% } else { 
+                for(post of posts) { %>
+                <div class="post" id="<%= post.postID %>">
+                    <img src="<%= post.user_photo %>" alt="" />
+
+                    <div class="post_info">
+                        <div class="top">
+                            <a href="/Profile?id=<%= post.from_user %>"><%= post.name %></a>
+                            <span><%= post.posted_when %></span>
+                        </div>
+
+                        <div class="content">
+                            <p><%- post.text %></p>
+                        </div>
+
+                        <div class="options">
+                            <a href="javascript:openComment(<%= post.postID %>);">Responder</a>
+                            <a href="javascript:like();" class="last">Gostei</a>(<%= post.likes %>)
+                        </div>
+
+                        <div class="responses">
+                            <div class="sub-comments">
+                                <% for(comm of pComments) { 
+                                    if(comm.postID === post.postID) { %>
+                                    <div class="content">
+                                        <img src="<%= comm.user_photo %>" alt="" />
+
+                                        <div class="right">
+                                            <div class="top">
+                                                <a href="/Profile?id=<%= comm.user_id %>"><%= comm.name %></a>
+                                                <span><%= comm.posted_when %></span>
+                                                <a href="javascript:void(0);" class="last">Gostei</a>(<%= comm.likes %>)
+                                            </div>
+        
+                                            <p><%- comm.text %></p>
+                                        </div>
+                                    </div>
+                                <% }
+                                }%>
+                            </div>
+
+                            <div class="comment-area" id="c-area-<%= post.postID %>">
+                                <form action="/commentPost?q=<%= post.postID %>" method="post" name="sub-com-<%= post.postID %>" id="sub-com-<%= post.postID %>">
+                                    <textarea name="response-<%= post.postID %>" id="response-<%= post.postID %>" cols="30" rows="10"></textarea>
+                                    
+                                </form>
+
+                                <div class="buttons" id="buttons-comment" style="display: block;">
+                                    <button type="submit" form="sub-com-<%= post.postID %>">Postar</button>
+                                    <button onclick="resetField('<%= post.postID %>'); openComment('<%= post.postID %>');">Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div><!-- Post  -->
+                <% }
+                } %>
+            </div><!-- Feed -->
+        </section><!-- Social media feed section -->
+
+        <section class="right-side">
+            <div class="friends">
+                <h3>Meus amigos (0)</h3>
+                
+                <!-- fazer verificação de amigos caso tenha algum -->
+                <!-- Mensagem temporaria. -->
+                <div class="no-friends">
+                    <p>Parece que você não tem nenhum amigo, adicione alguns agora mesmo!</p>
+                </div>
+
+                <!--<div class="grid">
+                    <div class="grid-content">
+
+                    </div>
+                </div> friends grid -->
+            </div><!-- friends tab -->
+
+            <div class="community">
+                <h3>Minhas comunidades (0)</h3>
+                
+                <!-- fazer verificação de comunidades caso tenha alguma -->
+                <!-- Mensagem temporaria. -->
+                <div class="no-community">
+                    <p>Parece que você não tem nenhum amigo, adicione alguns agora mesmo!</p>
+                </div>
+
+                <!--<div class="grid">
+                    <div class="grid-content">
+
+                    </div>
+                </div> friends grid -->
+            </div><!-- community tab -->
         </section><!-- Friends & community -->
     </main><!-- Page -->
+
+    <!-- Replace textarea to ckeditor api-->
+    <script>
+        CKEDITOR.on('instanceReady', function(evt) {
+            var editor = evt.editor;
+
+            // Se clicar aparece os botoes.
+            if(editor.name == "postcontent"){
+                editor.on('focus', function(e) {
+                    var div = document.getElementById("buttons");
+                    div.style.display = "block";
+                });
+
+                // se sair fora apaga.
+                editor.on('blur', function(e) {
+                    var div = document.getElementById("buttons");
+                    div.style.display = "none";
+                });
+            }
+        });
+
+        CKEDITOR.replace('postcontent',{
+            width: '97%',
+            height: 70,
+            editorplaceholder: 'Diga algo aos seus amigos ou poste fotos, vídeos ou outros links!',
+        });
+
+        // reseta / cancela o comentario pro id do post clicado.
+        function resetField(id)
+        {
+            var editor = CKEDITOR.instances['response-'+id];
+
+            if (editor) {
+                // Limpa o conteúdo do CKEditor
+                editor.setData('');
+                var div = document.getElementById("response-"+id);
+            }
+        }
+
+        // Abre o comentario pro id do post clicado.
+        function openComment(id){
+                var div = document.getElementById("c-area-"+id);
+                div.classList.toggle("show-textarea");
+                if(window.getComputedStyle(document.querySelector('#c-area-'+id)).display === "block") 
+                { document.getElementById("c-area-"+id).scrollIntoView(); }
+
+                // substitui o textarea do post clicado pelo editor da api.
+                CKEDITOR.replace( 'response-'+id, {
+                    width: '100%',
+                    height: 70,
+                    editorplaceholder: 'Diga algo aos seus amigos ou poste fotos, vídeos ou outros links!',
+                });
+        }
+    </script>
 </body>
 </html>

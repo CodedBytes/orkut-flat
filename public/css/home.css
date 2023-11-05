@@ -4,9 +4,10 @@
     --footer-color: rgb(194, 207, 245);
     --regwindow-back-color: white;
     --small-span-color: rgb(87, 87, 87);
-    --buttons-theme: rgb(81, 81, 212);
+    --buttons-theme: rgb(93, 93, 224);
+    --buttons-theme-hover: rgb(111, 111, 238);
     --links-hover-theme: rgb(101, 101, 231);
-    --buttons-theme-border: rgb(56, 56, 192);
+    --buttons-theme-border: rgb(72, 72, 211);
     --colorized-cell: rgb(208, 221, 253);
     --colorized-cell-weak: rgb(211, 222, 252);
 }
@@ -15,6 +16,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 @font-face {
@@ -46,9 +51,9 @@ header nav > .left {
 }
 
 header nav > .left > a > img{
-    width: 110px;
+    width: 115px;
     height: auto;
-    padding: 7px 10px 7px 5px;
+    padding: 7px 13px 7px 10px;
     background: rgb(217,217,217);
 background: linear-gradient(0deg, rgba(217,217,217,1) 5%, rgba(222,222,222,1) 25%, rgba(232,232,232,1) 69%, rgba(255,255,255,1) 83%, rgba(255,255,255,1) 100%);
 }
@@ -86,9 +91,9 @@ header nav > .right > span{
 }
 /* -------------------------------------------------------- */
 main{
-    padding: 25px 5%;
+    padding: 15px 5%;
     display: grid;
-    grid-template-columns: 205px auto 320px;
+    grid-template-columns: 190px auto 320px;
 }
 
 main section.left-side{
@@ -96,8 +101,8 @@ main section.left-side{
     flex-direction: column;
     justify-content: space-between;
     background-color: var(--regwindow-back-color);
-    width: 205px;
-    height: auto;
+    width: 190px;
+    height: 560px;
     padding: 28px 17px;
     border-radius: 3px;
     box-shadow: rgba(17, 17, 17, 0.3) 0px 3px 6px 0px;
@@ -108,7 +113,7 @@ main section.left-side{
 main section.left-side > .photo{
     display: flex;
     align-items: center;
-    width: 171px;
+    width: 100%;
     height: 180px;  
     position: relative; 
 }
@@ -183,4 +188,233 @@ main section.left-side > .links > .grid{
     display: grid;
     grid-template-columns: auto;
     align-items: center;
+}
+/* --------------------------------------------------------------------------------------------- */
+
+main section.feed{
+    display: flex;
+    flex-direction: column;
+    padding: 0px 15px;
+}
+
+main section.feed > .warning{
+    display: flex;
+    height: 35px;
+    width: 100%;
+    margin-bottom: 13px;
+    padding-left: 10px;
+    background-color: rgb(243, 173, 173);
+    box-shadow: rgba(17, 17, 17, 0.3) 0px 2px 4px 0px;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 500;
+    color: rgb(255, 255, 255);
+}
+main section.feed > .text-area{
+    width: 100%;
+    height: auto;
+    padding: 15px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 50px;
+    box-shadow: rgba(17, 17, 17, 0.3) 0px 2px 4px 0px;
+    background-color: var(--regwindow-back-color);
+}
+
+main section.feed > .text-area > h1{
+    margin-bottom: 10px;
+}
+main section.feed > .text-area > .buttons{
+    margin-top: 10px;
+}
+main section.feed > .text-area > .buttons > button,
+main section.feed > .social-feed > .post > .post_info > .responses > .comment-area > .buttons > button{
+    width: 85px;
+    padding: 4px;
+    font-size: 17px;
+    font-weight: bold;
+    border: 1px solid var(--buttons-theme-border);
+    background: var(--buttons-theme);
+    border-radius: 3px;
+    color: white;
+    font-family: bauhaus_normal;
+    cursor: pointer;
+    transition: 0.1s ease-in;
+}
+
+main section.feed > .text-area > .buttons > button:hover,
+main section.feed > .social-feed > .post > .post_info > .responses > .comment-area > .buttons > button:hover{
+    border: 1px solid var(--buttons-theme-border);
+    background: var(--buttons-theme-hover);
+    color: white;
+    transition: 0.1s ease-out;
+}
+/* ------------------------------------------------------------------------------ */
+
+main section.feed > .social-feed{
+    width: 100%;
+    margin-top: 15px;
+    min-height: 295px;
+    padding: 15px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    box-shadow: rgba(17, 17, 17, 0.3) 0px 2px 4px 0px;
+    background-color: var(--regwindow-back-color);
+}
+
+main section.feed > .social-feed > h2{
+    margin-bottom: 10px;
+}
+
+main section.feed > .social-feed > .post{
+    margin: 20px 0px;
+    display: flex;
+}
+
+main section.feed > .social-feed > .post > img{
+    width: 60px;
+    height: 60px;
+    margin-right: 15px;
+}
+
+main section.feed > .social-feed > .post > .post_info{
+    width: 100%;
+}
+
+main section.feed > .social-feed > .post > .post_info > .top > a,
+main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right > .top > a{
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    margin-right: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right > .top > a.last{
+    text-decoration: underline;
+    font-size: 15px;
+    font-weight: 400;
+    margin: 0px 5px 0px 15px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+main section.feed > .social-feed > .post > .post_info > .content,
+main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right > p{
+    margin: 5px 0px;
+    width:  85%;
+    font-size: 15px;
+}
+
+main section.feed > .social-feed > .post > .post_info > .top > span,
+main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right > .top  > span{
+    font-size: 12px;
+}
+
+
+main section.feed > .social-feed > .post > .post_info > .options > a{
+    text-decoration: underline;
+    font-size: 16px;
+    margin-right: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+main section.feed > .social-feed > .post > .post_info > .options > a.last{
+    margin-right: 5px;
+}
+
+main section.feed > .social-feed > .post > .post_info > .responses {
+    margin: 19px 0px 11px 0px;
+}
+
+main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content{
+    display: flex;
+    margin-bottom: 10px;
+}
+
+main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right{
+    width: 100%;
+}
+
+main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > img{
+    width: 45px;
+    height: 30px;
+    padding-right: 10px;
+}
+
+main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments{
+    padding-left: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+main section.feed > .social-feed > .post > .post_info > .responses > .comment-area{
+    margin-top: 10px;
+    display: none;
+}
+
+main section.feed > .social-feed > .post > .post_info > .responses > .comment-area form{
+    margin-bottom: 7px;
+}
+
+main section.feed > .social-feed > .no-scraps{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+main section.feed > .social-feed > .no-scraps > p{
+    width: 450px;
+    color: var(--small-span-color);
+}
+/* -------------------------------------------------------------------------- */
+
+main section.right-side{
+    display: flex;
+    flex-direction: column;
+}
+
+main section.right-side > .friends{
+    width: 100%;
+    min-height: 220px;
+    max-height: 420px;
+    padding: 15px;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+    box-shadow: rgba(17, 17, 17, 0.3) 0px 2px 4px 0px;
+    background-color: var(--regwindow-back-color);
+}
+main section.right-side > .community{
+    width: 100%;
+    min-height: 220px;
+    max-height: 420px;
+    margin-top: 15px;
+    padding: 15px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    box-shadow: rgba(17, 17, 17, 0.3) 0px 2px 4px 0px;
+    background-color: var(--regwindow-back-color);
+}
+
+main section.right-side > .friends > h3,
+main section.right-side > .comunnity > h3{
+    margin-bottom: 10px;
+}
+
+main section.right-side > .friends > .no-friends,
+main section.right-side > .community > .no-community{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    height: calc(100% - 60px);
+}
+main section.right-side > .friends > .no-friends > p,
+main section.right-side > .community > .no-community > p{
+    text-align: center;
+    color: var(--small-span-color);
+}
+
+/* ----------------------- toggles ---------------------------------*/
+main section.feed > .social-feed > .post > .post_info > .responses > .comment-area.show-textarea{
+    display: block;
 }
