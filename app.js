@@ -13,12 +13,15 @@ const path = require('path');
 const multer = require('multer');
 const bodyparser = require('body-parser');
 const crypt = require('bcrypt');
+const fs = require('fs');
+const mime = require('mime-types');
 
 // HTML Request scheduler
 const app = express();
 
 // DB Module
 const conn = require('./exports/db');
+const { exit } = require("process");
 
 // Apontamento de pastas a serem usadas pelo NODE.
 app.use(express.json());
@@ -40,70 +43,33 @@ app.use(
       saveUninitialized: true,
       cookie: {
         maxAge: 1 * 24 * 60 * 60 * 1000, // Tempo de expiração em milissegundos (1 dia).
-        secure: false, // Defina como true se estiver usando HTTPS
+        secure: false, // Definir como true se estiver usando HTTPS
         httpOnly: true, // Impede acesso ao cookie via JavaScript no navegador
       }
     })
   );
 
-// Multer guardando imagem de perfil baseado no id do usuario
-function upIMG(id)
-{
-    multer.diskStorage({
-        destination: (req, file, callBack) => {
-            callBack(null, './public/_files/photos/' + id + '/');// Diretorio para salvar as imagens de perfil  
-        },
-        filename: (req, file, callBack) => {// Nome do arquivo.
-            callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+// Multer guardando imagem e video de posts
+const storageIMGSAndVideos = multer.diskStorage({
+    destination: (req, file, callBack) => {
+        if (!fs.existsSync('./public/_files/post_content/' + req.session.profile_id + '/')) {
+            fs.mkdirSync('./public/_files/post_content/' + req.session.profile_id + '/');
         }
-    });
-}
+        else callBack(null, './public/_files/post_content/' + req.session.profile_id + '/');// Diretorio para salvar as imagens de post
+    },
+    filename: (req, file, callBack) => {callBack(null, 'File -' + Date.now() + path.extname(file.originalname));}
+});
 
-// Multer guardando imagem de posts baseado no id do usuario que fez o post
-function upPostIMG(id)
-{
-    multer.diskStorage({
-        destination: (req, file, callBack) => {
-            callBack(null, './public/_files/images/' + id + '/');// Diretorio para salvar as imagens de perfil  
-        },
-        filename: (req, file, callBack) => {// Nome do arquivo.
-            callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+// Multer guardando imagem de perfil
+const storageProfileIMGS = multer.diskStorage({
+    destination: (req, file, callBack) => {
+        if (!fs.existsSync('./public/_files/photos/' + req.session.profile_id + '/')) {
+            fs.mkdirSync('./public/_files/photos/' + req.session.profile_id + '/');
         }
-    });
-}
-
-// Multer guardando videos de post baseado no id do usuario que fez o post.
-function upPostVideo(id)
-{
-    multer.diskStorage({
-        destination: (req, file, callBack) => {
-            callBack(null, './public/_files/videos/' + id + '/');// Diretorio para salvar as imagens de perfil  
-        },
-        filename: (req, file, callBack) => {// Nome do arquivo.
-            callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-        }
-    });
-}
-
-
-function upImgProfile(id)
-{ 
-    multer({
-        storage: upIMG(id)
-    });
-}
-function upImgPost(id)
-{ 
-    multer({
-        storage: upPostIMG(id)
-    });
-}
-function upVideoPost(id)
-{ 
-    multer({
-        storage: upPostVideo(id)
-    });
-}
+        else callBack(null, './public/_files/photos/' + req.session.profile_id + '/');// Diretorio para salvar as imagens de perfil  
+    },
+    filename: (req, file, callBack) => {callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));}
+});
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -112,7 +78,8 @@ function upVideoPost(id)
 /////////////////////////////////////////////////////////////////////////////////////////////
 //////////                              PAGE REQUESTS                            ////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-// Redirecionando o dominio para a pagina certa
+
+// Redirecionando o dominio principal para a pagina certa
 app.get("/",(req,res)=>{
     if (req.session.loggedin) {
         res.redirect("/Home");
@@ -129,10 +96,11 @@ app.get("/Login",(req,res)=>{
 
 // Register
 app.get("/Register",(req,res)=>{
-    // Month obj
+    // Objeto gardando nome dos meses
     var months = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro",
     "Outubro", "Novembro", "Dezembro"];
 
+    // 
     if(!req.session.loggedin)res.render(path.join(__dirname + '/public/pointers/signup.ejs'), {result: months, msg: warning });
     else res.redirect("/Login");
 });
@@ -147,26 +115,128 @@ app.get("/Home",(req,res)=>{
             if(results.length > 0)
             {
                 // tem q pegar um filtro baseados nos amigos q ele tem. (exibindo posts globais por enquanto).
-                conn.query("SELECT * FROM feed_posts ORDER BY posted_when DESC;",(error, datas)=>{
+                conn.query("SELECT * FROM feed_posts ORDER BY `date` DESC;",(error, datas)=>{
                     if(error)throw error;
                     if(datas.length > 0)
                     {
+                        // inserindo o post na tabela de likes para novos usuários que não estejam na tabela
+                        conn.query("SELECT * FROM accounts;", (error, alll) => {
+                            if (error) throw error;
+                            if (alll.length > 0)
+                            {
+                                for (var i = 0; i < datas.length; i++)
+                                {
+                                    for (var a = 0; a < alll.length; a++)
+                                    {
+                                        const postID = datas[i].postID;
+                                        const user_id = alll[a].profile_id;
+
+                                        // Verifica se não existe registros iguais antes de inserir
+                                        conn.query("SELECT * FROM post_comments_liked WHERE postID = ? AND user_id = ?", [postID, user_id], (error, results) => {
+                                            if (error) return res.status(400).send("Erro na consulta.");
+                                            if (results.length === 0)
+                                            {
+                                                // Não existe registro igual, então insira
+                                                conn.query("INSERT INTO post_comments_liked (postID, user_id, liked) VALUES (?, ?, 0);",
+                                                [postID, user_id], (error) => {
+                                                    if (error) return res.status(400).send("Erro ao inserir o registro.");
+                                                });
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        });
+
                         conn.query("SELECT * FROM post_comments ORDER BY posted_when;",(error, comments)=>{
                             if(error) throw error;
                             if(comments.length > 0)
                             {
-                                res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments});
-                                warning = "";
+                                conn.query("SELECT * FROM post_media;",(error, photos)=>{
+                                    if(error) throw error;
+                                    if(photos.length > 0)
+                                    {
+                                        conn.query("SELECT * FROM post_comments_liked;", (error, liked)=>{
+                                            if(error) throw error;
+                                            if(liked.length > 0)
+                                            {
+                                                res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments, isliked: liked, imgs: photos});
+                                                warning = "";
+                                            }
+                                            else
+                                            {
+                                                res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments, isliked: liked, imgs: photos});
+                                                warning = "";
+                                            }
+                                        });
+                                    }
+                                    else 
+                                    {
+                                        res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments, imgs: photos, isliked: liked});
+                                        warning = "";
+                                    }
+                                });
                             }
                             else
                             {
-                                res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments});
-                                warning = "";
+                                conn.query("SELECT * FROM post_media;",(error, photos)=>{
+                                    if(error) throw error;
+                                    if(photos.length > 0)
+                                    {
+                                        conn.query("SELECT * FROM post_comments_liked;", [req.session.profile_id],(error, liked)=>{
+                                            if(error) throw error;
+                                            if(liked.length > 0)
+                                            {
+                                                res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments, isliked: liked, imgs: photos});
+                                                warning = "";
+                                            }
+                                            else
+                                            {
+                                                res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments, isliked: liked, imgs: photos});
+                                                warning = "";
+                                            }
+                                        });
+                                    }
+                                    else 
+                                    {
+                                        res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, posts: datas, no_posts: false, msg: warning, pComments: comments, imgs: photos});
+                                        warning = "";
+                                    }
+                                });
                             }
                         });
                     }
                     else
                     {
+                        // inserindo o post na tabela de likes pra novos usuarios que nao estejam na tabela.
+                        conn.query("SELECT * FROM accounts;", (error, alll) => {
+                            if (error) throw error;
+                            if (alll.length > 0)
+                            {
+                                for (var i = 0; i < datas.length; i++)
+                                {
+                                    for (var a = 0; a < alll.length; a++)
+                                    {
+                                        const postID = datas[i].postID;
+                                        const user_id = alll[a].profile_id;
+
+                                        // Verifica se não existe registros iguais antes de inserir
+                                        conn.query("SELECT * FROM post_comments_liked WHERE postID = ? AND user_id = ?", [postID, user_id], (error, results) => {
+                                            if (error) return res.status(400).send("Erro na consulta.");
+                                            if (results.length === 0)
+                                            {
+                                                // Não existe registro igual, então insira
+                                                conn.query("INSERT INTO post_comments_liked (postID, user_id, liked) VALUES (?, ?, 0);",
+                                                [postID, user_id], (error) => {
+                                                    if (error) return res.status(400).send("Erro ao inserir o registro.");
+                                                });
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        });
+
                         res.render(path.join(__dirname + '/public/pointers/social/home.ejs'),{db: results, no_posts: true, msg: warning});
                         warning = "";
                     }
@@ -174,8 +244,7 @@ app.get("/Home",(req,res)=>{
             }
             else
             {
-                warning = "Aconteceu um erro inesperado com o sistema, por favor tente fazer login mais tarde.";
-                res.redirect("/Login");
+                res.redirect("/Logout");
             }
         });
     } else {
@@ -183,15 +252,110 @@ app.get("/Home",(req,res)=>{
     }
 });
 
+// Perfil
+app.get('/Profile', (req, res)=>{
+
+    //Pegndo a user id passada
+    const user_id = req.query.id;
+
+    // pega horario atual do server para mensagens diferentes.
+    const date = new Date();
+    const hour = date.getHours();
+
+    // verifica se voce esta logado ou nao
+    if (req.session.loggedin) {
+        if(user_id.length > 0)
+        {
+            // Pegando as informações da db sobre o usuario.
+            conn.query("SELECT * FROM accounts WHERE profile_id = ?;",[user_id],(error,results)=>{
+                if(error) throw error;
+                if(results.length > 0)
+                {
+                    // Pegando informações do usuario atual logado 
+                    conn.query("SELECT * FROM accounts WHERE profile_id = ?;",[req.session.profile_id],(error,myself)=>{
+                        if(error) throw error;
+                        if(myself.length > 0)
+                        {   
+                            // Pegando informações do perfil do usuario 
+                            conn.query("SELECT * FROM profile_info WHERE profile_id = ?;",[user_id],(error,profInfo)=>{
+                                if(error) throw error;
+                                if(profInfo.length > 0)
+                                {  
+                                    // Pegando informações das visitas
+                                    conn.query("SELECT * FROM profile_visits;", (error,visits)=>{
+                                        if(error) throw error;
+                                        if(!error)
+                                        {
+                                            // se o id do cara logado for diferente do que vc esta vendo
+                                            // grava sua visit no perfil dele.
+                                            if(req.session.profile_id !== results[0].profile_id)
+                                            {
+                                                conn.query("INSERT INTO profile_visits (profile_id, first_name, visited_profile_id) VALUES (?, ?, ?);",
+                                                [myself[0].profile_id, myself[0].first_name, user_id], (error,)=>{
+                                                    if(error) throw error;
+                                                });
+                                            }
+
+                                            res.render(path.join(__dirname + '/public/pointers/social/profile.ejs'),{hour, profile: results, me: myself, info: profInfo, visit: visits});
+                                        }
+                                    });
+                                }
+                                else
+                                {
+                                    res.redirect("/Logout");
+                                }
+                            });
+                        }
+                        else
+                        {
+                            res.redirect("/Logout");
+                        }
+                    });
+                }
+            });
+        }
+    }
+    else
+    {
+        warning = "Você não pode acessar um perfil sem antes ter entrado na plataforma.";
+        res.redirect("/Login");
+    }
+});
+
+// Ajax home -> atualizando likes.
+app.get('/attLikes', (req, res)=>{
+    var id = req.query.q;
+    console.log(id);
+
+    // Pegando as informações da db
+    conn.query("SELECT * FROM accounts WHERE email=?",[req.session.email],(error,results)=>{
+        if(error) throw error;
+        if(results.length > 0)
+        {
+            // verificando se ja deu like nos posts.
+            conn.query("SELECT * FROM post_comments_liked;", (error, liked)=>{
+                if(error) throw error;
+                if(liked.length > 0)
+                {
+                    // tem q pegar um filtro baseados nos amigos q ele tem. (exibindo posts globais por enquanto).
+                    conn.query("SELECT * FROM feed_posts WHERE postID = ?;", [id],(error, datas)=>{
+                        if(error)throw error;
+                        if(datas.length > 0) res.render(path.join(__dirname + '/public/pointers/ajax/attLikes.ejs'),{db: results, posts: datas, isliked: liked});
+                    });
+                }
+            });
+        }
+        else return res.status(400).send('Erro ao achar o usuario');
+    });
+});
+
 // Logout
 app.get('/Logout', (req, res) => {
     req.session.destroy(err => {
-      if (err) {
-        console.error(err);
-      }
+      if (err) console.error(err);
       res.redirect('/Login');
     });
-  });
+});
   
 
 //404
@@ -222,6 +386,7 @@ app.post("/Login",(req,res)=>{
                     // Cookies
                     req.session.loggedin = true;
                     req.session.email = results[0].email;
+                    req.session.profile_id = results[0].profile_id;
 
                     if(cb) {req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;}// 30 dias até deslogar.
 
@@ -273,7 +438,7 @@ app.post("/doRegister",(req,res)=>{
                     {
                         // Se não tem, pode criar a conta.
                         // Ids randomicos para cada perfil de usuario.
-                        var profile_id = Math.floor(Math.pow(10, 10-1) + Math.random() * 9 * Math.pow(10, 10-1));
+                        var profile_id = Math.floor(Math.random() * 900000) + 100000;
 
                         // Aplicando hash na senha e gravando no banco.
                         await crypt.hash(password, 10, (error, hash)=>{
@@ -283,11 +448,20 @@ app.post("/doRegister",(req,res)=>{
                                 if(error) throw error;
                                 if(results.affectedRows > 0)
                                 { 
-                                    // Cookies
-                                    req.session.loggedin = true;
-                                    req.session.email = results[0].email;
-                                    erro = ""; 
-                                    res.redirect("/Home"); 
+                                    conn.query("INSERT INTO profile_info (profile_id) VALUES (?);",[profile_id],(error,profile)=>{
+                                        if(error) throw error;
+                                        if(profile.affectedRows > 0)
+                                        { 
+                                            // Cookies
+                                            req.session.loggedin = true;
+                                            req.session.email = email;
+                                            req.session.profile_id = profile_id;
+
+                                            erro = ""; 
+                                            res.redirect("/Home"); 
+                                        }
+                                    });
+                                    
                                 }
                                 else { erro = "Não foi possivel fazer o cadastro, entre em contato com o suporte."; res.redirect("/Register"); }
                             });
@@ -301,9 +475,11 @@ app.post("/doRegister",(req,res)=>{
 
 
 // Post no feed
-app.post("/makePost", (req, res)=>{
+const upload = multer({ storage: storageIMGSAndVideos });// Upload ed fotos
+app.post("/makePost", upload.array('file'),(req, res)=>{
     // pegando texto e email
-    var text = req.body.postcontent;
+    const text = req.body.ckeditorContent;
+    const file = req.files;
     var email = req.session.email;
 
     // hora atual
@@ -312,7 +488,7 @@ app.post("/makePost", (req, res)=>{
     const min = date.getMinutes();
 
     // Verificando se o texto esta vazio ou não
-    if(text.length > 0)
+    if(text.length > 0 || req.files)
     {
         // pegando o nome do usuario e a foto dele.
         conn.query("SELECT * FROM accounts WHERE email = ?;",[email],(error, result)=>{
@@ -320,28 +496,86 @@ app.post("/makePost", (req, res)=>{
             if(result.length > 0)
             {
                 // Salva o post
-                conn.query("INSERT INTO feed_posts (from_user, name,`text`, posted_when, user_photo, liked) VALUES (?, ?, ?, ?, ?, ?);",
-                [result[0].profile_id, result[0].first_name,text, hour+':'+min, result[0].photo, 0],(error, results)=>{
+                conn.query("INSERT INTO feed_posts (from_user, name,`text`, posted_when, date, user_photo) VALUES (?, ?, ?, ?, now(), ?);",
+                [result[0].profile_id, result[0].first_name, text, hour+':'+min, result[0].photo],(error, results)=>{
                     if(error)throw error;
                     if(results.affectedRows > 0)
                     {
-                        warning = "";
-                        res.redirect("/Home");
+                        // Pegando id do post.
+                        conn.query("SELECT * FROM feed_posts WHERE `text`=?",[text],(error, post)=>{
+                            if(error)throw error;
+                            if(post.length > 0)
+                            {
+                                // inserindo o post na tabela de likes.
+                                conn.query("SELECT * FROM accounts;",(error, all)=>{
+                                    if(error) throw error;
+                                    if(all.length > 0)
+                                    {
+                                        // inserindo por todos os usuarios mas verificando se ja existe.
+                                        for (var i = 0; i < datas.length; i++)
+                                        {
+                                            for (var a = 0; a < alll.length; a++)
+                                            {
+                                                const postID = datas[i].postID;
+                                                const user_id = alll[a].profile_id;
+                                
+                                                // Verifica se não existe registros iguais antes de inserir
+                                                conn.query("SELECT * FROM post_comments_liked WHERE postID = ? AND user_id = ?", [postID, user_id], (error, results) => {
+                                                    if (error) return res.status(400).send("Erro na consulta.");
+                                                    if (results.length === 0)
+                                                    {
+                                                        // Não existe registro igual, então insira
+                                                        conn.query("INSERT INTO post_comments_liked (postID, user_id, liked) VALUES (?, ?, 0);",
+                                                        [postID, user_id], (error) => {
+                                                            if (error) return res.status(400).send("Erro ao inserir o registro.");
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        }
+
+                                        // grava na tabela de fotos caso tenha upload de fotos.
+                                        if(req.files)
+                                        {
+                                            // Salva as imagens
+                                            for (let i = 0; i < req.files.length; i++) {
+                                                // Verifica o tipo de cada arquivo passado.
+                                                const mimeType = mime.lookup(req.files[i].originalname);
+                                                console.log(mimeType);
+
+                                                // Path completo do arquivo das fotos e videos do post
+                                                var imgsrc = '/post_content/' + req.session.profile_id + '/' + req.files[i].filename;
+                                                if(mimeType === "image/jpeg" || mimeType === "image/png")
+                                                {
+                                                    conn.query("INSERT INTO post_media (post_id, image) VALUES (?, ?);",
+                                                    [post[0].postID, imgsrc],(error)=>{if(error) throw error;});
+                                                } 
+                                                else if(mimeType === "video/mp4")
+                                                {
+                                                    conn.query("INSERT INTO post_media (post_id, video) VALUES (?, ?);",
+                                                    [post[0].postID, imgsrc],(error)=>{if(error) throw error;});
+                                                }
+                                            }
+                                            return res.status(200).send("Post criado com sucesso!");
+                                        }
+                                    }
+                                });
+                                
+                            }
+                        });
                     }
                     else
                     {
-                        warning = "Houve ao realizar o post, volte a fazer o post mais tarde.";
-                        res.redirect("/Home");
+                        return res.status(400).send("error");
                     }
                 });
             }
             else
             {
-                warning = "Houve ao realizar o post, volte a fazer o post mais tarde.";
-                res.redirect("/Home");
+                return res.status(400).send("error");
             }
         });
-    }else { warning = "Você precisa digitar um texto para postar."; res.redirect("/Home");}
+    }else { return res.status(400).send("error");}
 });
 
 // Comentando o post
@@ -350,7 +584,6 @@ app.post("/commentPost",(req, res)=>{
     var post_id = req.query.q;
     var text = req.body['response-' + post_id];
     var email = req.session.email;
-
 
     // hora atual
     const date = new Date();
@@ -388,6 +621,107 @@ app.post("/commentPost",(req, res)=>{
             }
         });
     }else { warning = "Você precisa digitar um texto para postar."; res.redirect("/Home");}
+});
+
+// Like post
+app.post("/likePost",(req, res)=>{
+    //pegando id passado no link
+    const id = req.query.q;
+    const opt = req.query.opt;
+    console.log(opt);
+
+    // verificando se não tem nenhuma entrada indevida.
+    if(id.length > 0)
+    {
+        if(opt.length > 0)
+        {
+            // Processo de like
+            if(opt === '1')
+            {
+                // query que pega as informações da tabela de likes
+                conn.query("SELECT * FROM post_comments_liked WHERE postID = ? and user_id = ?;", [id, req.session.profile_id], (error, result)=>{
+                    if(error) throw error;
+                    if(result.length > 0)
+                    {
+                        // checa se o usuario ja deu like neste post 
+                        if(result[0].liked === 1) { return res.status(400).send(" ja deu o like.");}
+                        else
+                        {
+                            // DA O LIKE
+                            conn.query("UPDATE post_comments_liked SET liked = 1 WHERE postID = ? and user_id = ?;", 
+                            [id, req.session.profile_id], (error, liked)=> {
+                                if(error) throw error;
+                                if(liked.affectedRows > 0)
+                                {
+                                    // Atualiza o contador.
+                                    conn.query("UPDATE feed_posts SET likes = likes + 1 WHERE postID = ?;", 
+                                    [id, req.session.profile_id], (error, liked)=> {
+                                        if(error) throw error;
+                                        if(liked.affectedRows > 0) return res.status(200);
+                                        else return res.status(400).send(" Erro interno ao processar o like.");
+                                    });
+                                }
+                                else
+                                {
+                                    return res.status(400).send(" Erro interno ao processar o like.");
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+            else
+            {
+                // query que pega as informações da tabela de likes
+                conn.query("SELECT * FROM post_comments_liked WHERE postID = ? and user_id = ?;", [id, req.session.profile_id], (error, result)=>{
+                    if(error) throw error;
+                    if(result.length > 0)
+                    {
+                        // checa se o usuario ja deu like neste post 
+                        if(result[0].liked === 0){ return res.status(400).send(" Você ja deu like neste post.");}
+                        else
+                        {
+                            // DA O DESLIKE
+                            conn.query("UPDATE post_comments_liked SET liked = 0 WHERE postID = ? and user_id = ?;", 
+                            [id, req.session.profile_id], (error, liked)=> {
+                                if(error) throw error;
+                                if(liked.affectedRows > 0)
+                                {
+                                    // Atualiza o contador.
+                                    conn.query("UPDATE feed_posts SET likes = likes - 1 WHERE postID = ?;", 
+                                    [id, req.session.profile_id], (error, liked)=> {
+                                        if(error) throw error;
+                                        if(liked.affectedRows > 0) return res.status(200);
+                                        else return res.status(400).send(" Erro interno ao processar o deslike.");
+                                    });
+                                }
+                                else return res.status(400).send(" Erro interno ao processar o deslike.");
+                            });
+                        }
+                    }
+                });
+            }
+        }
+    }
+});
+
+// Pesquisando por usuarios.
+app.get("/searchUser", (req, res)=>{
+
+    // Pegando valor do link
+    const user = req.query.q;
+
+    // Puxando suaurio baseado no id de perfil ou nome.
+    if(user.length > 0)
+    {
+        conn.query("SELECT * FROM accounts WHERE profile_id LIKE ? OR first_name LIKE ?", 
+        ["%" + user + "%", "%" + user + "%"], (error, results)=>{
+            if(error) throw error;
+            if(results.length > 0) res.status(200).render(path.join(__dirname + '/public/pointers/ajax/attSearch.ejs'),{db: results});
+            else res.status(400).send('Erro ao pesquisar, tente novamente mais tarde.'); 
+        });
+    }
+    else res.status(400).send('Você não digitou nada no campo de pesquisa.');
 });
 /////////////////////////////////////////////////////////////////////////////////////////////
 

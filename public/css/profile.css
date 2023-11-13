@@ -1,0 +1,54 @@
+main section.feed > .text-area > h1{
+    font-size: 30px;
+    margin-bottom: 0;
+}
+
+main section.feed > .text-area > span.link-dir{
+    color: var(--small-span-color);
+}
+
+main section.feed > .text-area > span.link-dir > a{
+    color: rgb(66, 66, 253);
+    text-decoration: none;
+}
+
+
+main section.feed > .text-area > .infos-section{
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    margin: 10px 0px;
+}
+
+main section.feed > .text-area > .infos-section > .content{
+    margin-right: 17px;
+    width: auto;
+}
+
+main section.feed > .text-area > .infos-section > .content > span{
+    font-size: 12.5px;
+}
+
+main section.feed > .text-area > .infos-section > .content a,
+main section.feed > .text-area > .infos-section > .content{
+    text-decoration: none;
+    color: black;
+}
+
+main section.feed > .text-area > .infos-section > .content a > .line,
+main section.feed > .text-area > .infos-section > .content .line{
+    display: flex;
+    align-items: center;
+}
+
+main section.feed > .text-area > .infos-section > .content a > .line > img,
+main section.feed > .text-area > .infos-section > .content .line > img{
+    margin: 0px 5px 0px 2px;
+}
+
+main section.feed > .text-area > .last-seen{
+    display: flex;
+}
+main section.feed > .text-area > .last-seen > span{
+    margin-right: 5px;
+}

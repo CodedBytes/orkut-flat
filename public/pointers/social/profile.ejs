@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/home.css">
+    <link rel="stylesheet" href="/profile.css">
+    <link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
+    <% if(profile[0].profile_id === me[0].profile_id) { %>
+        <title>Orkut - Meu Perfil</title>
+    <% } else {%>
+        <title>Orkut - <%= profile[0].first_name %> <%= profile[0].last_name %></title>
+    <% } %>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="left">
+                <a href="/Home"><img src="/logo.png" alt=""></a>
+
+                <ul>
+                    <li><a href="/Home">Início</a></li>
+                    <li><a href="/Scraps">Página de recados</a></li>
+                    <li><a href="/Friends">Amigos</a></li>
+                    <li><a href="/Community">Comunidades</a></li>
+                </ul>
+            </div>
+
+            <div class="right">
+                <span><%= me[0].email %></span>
+                <a href="/Logout">Sair</a>
+                
+                <div class="search-user">
+                    <form id="searchForm">
+                        <input type="text" name="find-user" id="find-user" placeholder="Procurar usuario" required />
+                    </form>
+                    <a onclick="sendSearchForm(event);" id="search"><img src="/icons/loupe.png" alt=""></a>
+
+                </div>
+            </div>
+        </nav>
+    </header><!-- Orkut header -->
+
+    <main>
+        <!-- search popup -->
+        <div class="search-window" id="world-dropdown">
+            <div class="results" id="show-results">
+                <a href="#">
+                    <div class="content">
+                        <img src="/photos/default_photo.png" alt="">
+                        <span>nome aqui</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <section class="left-side">
+            <div class="photo">
+                <img src="<%= profile[0].photo %>" alt="" />
+            </div><!-- Profile photo area -->
+            <hr>
+            <div class="info-area">
+                <span><%= profile[0].first_name %></span><br>
+                
+                <div class="quick">
+                    <% if(profile[0].gender == 0) var gender_name = "Masculino"; else var gender_name = "Feminino";%>
+                    <span><%= gender_name %></span><br>
+
+                    <% if(profile[0].relationship != "") {%>
+                        <span><%= gender_name %>, <%= profile[0].relationship %></span><br>
+                    <% }%>
+
+                    <% if(profile[0].city != "") {%>
+                        <span><%= profile[0].city %>, </span>
+                    <% }%>
+
+                    <% if(profile[0].country != "") {%>
+                        <span><%= profile[0].country %>. </span>
+                    <% }%>
+                </div><!-- Quick informations -->
+
+                <div class="edit-profile">
+                    <% if(profile[0].profile_id === me[0].profile_id) { %>
+                        <div class="grid-content">
+                            <img src="/icons/profile_ico.png" alt="" />
+                                <a href="/EditProfile?id=<%= me[0].profile_id %>">editar perfil</a>
+                        </div>
+                    <% } else { %>
+                        <div class="grid-content">
+                            <img src="/icons/add.png" alt="" />
+                                <a href="javascript:SendFriendRequest(event);"> Adicionar Amigo</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div><!-- Profile info area -->
+
+            <div class="links">
+                <div class="grid">
+                    <% if(profile[0].profile_id !== me[0].profile_id) { %>
+                        <div class="grid-content">
+                            <img src="/icons/profile_ico.png" alt="" />
+                            <a href="/Profile?id=<%= me[0].profile_id %>" title="voltar ao meu perfil." >voltar</a>
+                        </div>
+                    <% } %>
+                    
+                    <div class="grid-content">
+                        <img src="/icons/scraps_ico.png" alt="" />
+                        <a href="/Scraps?id=<%= profile[0].profile_id %>" title="recados" >recados</a>
+                    </div>
+
+                    <div class="grid-content">
+                        <img src="/icons/photos_ico.png" alt="" />
+                        <a href="/Photos?id=<%= profile[0].profile_id %>">fotos</a>
+                    </div>
+
+                    <div class="grid-content">
+                        <img src="/icons/videos_ico.png" alt="" />
+                        <a href="/Videos?id=<%= profile[0].profile_id %>">vídeos</a>
+                    </div>
+
+                    <div class="grid-content">
+                        <img src="/icons/depoiments_ico.png" alt="" />
+                        <a href="/Depoiments?id=<%= profile[0].profile_id %>">depoimentos</a>
+                    </div><br>
+
+                    <div class="grid-content">
+                        <img src="/icons/options_ico.png" alt="" />
+                        <a href="/Options?id=<%= profile[0].profile_id %>">opções</a>
+                    </div>
+                </div><!-- grid for links -->
+            </div><!-- Social links -->
+        </section><!-- social links & profile photo -->
+
+        <section class="feed">
+            <!-- Advice banner -->
+            <div class="warning">
+                <span style="color: rgb(255, 0, 0); font-size: 17px;">Aviso: </span><span id="warnings">Orkut Flat! - Versão de portfolio v0.2.</span>
+            </div>
+
+            <div class="text-area">
+                <%  if(profile[0].profile_id === me[0].profile_id) { %>
+                    <% if(hour >= 00 && hour <= 05) { %>
+                        <h1>Boa Madrugada <%= profile[0].first_name %> <%= profile[0].last_name %></h1>
+                    <% } else if(hour > 05 && hour < 12) { %>
+                        <h1>Bom dia <%= profile[0].first_name %> <%= profile[0].last_name %></h1>
+                    <% } else if(hour >= 12 && hour <= 18) { %>
+                        <h1>Boa tarde <%= profile[0].first_name %> <%= profile[0].last_name %></h1>
+                    <% } else if(hour > 18 && hour < 00) { %>
+                        <h1>Boa noite <%= profile[0].first_name %> <%= profile[0].last_name %></h1>
+                    <% } %>
+                <% } else {%>
+                    <h1><%= profile[0].first_name %> <%= profile[0].last_name %></h1>
+                <% }%>
+
+                <% if(profile[0].profile_id === me[0].profile_id) { %>
+                    <span class="link-dir"><a href="/Home">Home</a> > Meu Perfil</span>
+                <% } else { %>
+                    <span class="link-dir"><a href="/Home">Home</a> > Perfil do(a) <%= profile[0].first_name %></span>
+                <% } %>
+
+                <div class="infos-section">
+                    <div class="content">
+                        <span>Recados</span>
+                        <% if(profile[0].profile_id !== me[0].profile_id) { %>
+                            <a href="javascript:void(0);">
+                                <div class="line">
+                                    <img src="/icons/scraps_ico.png" alt="" />
+                                    <span><%= info[0].scraps %></span>
+                                </div>
+                            </a>
+                        <% } else { %>
+                            <div class="line">
+                                <img src="/icons/scraps_ico.png" alt="" />
+                                <span><%= info[0].scraps %></span>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="content">
+                        <span>Fotos</span>
+                        <% if(profile[0].profile_id !== me[0].profile_id) { %>
+                            <a href="javascript:void(0);">
+                                <div class="line">
+                                    <img src="/icons/photos_ico.png" alt="" />
+                                    <span><%= info[0].photos %></span>
+                                </div>
+                            </a>
+                        <% } else { %>
+                            <div class="line">
+                                <img src="/icons/photos_ico.png" alt="" />
+                                <span><%= info[0].photos %></span>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="content">
+                        <span>Vídeos</span>
+                        <% if(profile[0].profile_id !== me[0].profile_id) { %>
+                            <a href="javascript:void(0);">
+                                <div class="line">
+                                    <img src="/icons/videos_ico.png" alt="" />
+                                    <span><%= info[0].videos %></span>
+                                </div>
+                            </a>
+                        <% } else { %>
+                            <div class="line">
+                                <img src="/icons/videos_ico.png" alt="" />
+                                <span><%= info[0].videos %></span>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="content">
+                        <span>Fãs</span>
+                        <% if(profile[0].profile_id !== me[0].profile_id) { %>
+                            <a href="javascript:void(0);">
+                                <div class="line">
+                                    <img src="/icons/fans_ico.png" alt="" />
+                                    <span><%= info[0].fans %></span>
+                                </div>
+                            </a>
+                        <% } else { %>
+                            <div class="line">
+                                <img src="/icons/fans_ico.png" alt="" />
+                                <span><%= info[0].fans %></span>
+                            </div>
+                        <% } %>
+                    </div>
+                </div><!-- user scraps, messages, etc  informations -->
+
+                <% if(profile[0].profile_id === me[0].profile_id) { %>
+                    <div class="last-seen">
+                        <h4>Visualizações do seu perfil: </h4>
+                        <span> Desde <%= me[0].created_when %>: <%= info[0].vis_created %>, </span>
+                        <span>Semana passada: <%= info[0].vis_created %>, </span>
+                        <span>Ontem: <%= info[0].vis_created %>. </span>
+                    </div><!-- quem viu o meu perfil. -->
+
+                    <div class="who-visited">
+                        <% if(visit.length !== 0) { 
+                            for(visitors of visit) { 
+                                if(visitors.profile_id !== me[0].profile_id) {
+                                    if(visitors.visited_profile_id === me[0].profile_id) {%>
+                                        <h4>Seus visitantes: </h4>
+                        <%          }
+                                }
+                            }
+                        } %>
+
+                        <% for(visitors of visit) { 
+                            if(visitors.profile_id !== me[0].profile_id) {
+                                if(visitors.visited_profile_id === me[0].profile_id) { %>
+                                    <a href="/Profile?id=<%= visitors.profile_id %>"><%= visitors.first_name %></a>
+                        <%      }
+                            }
+                        } %>
+                    </div>
+                <% } %>
+
+            </div><!-- post area -->
+        </section><!-- main section with the original feed format -->
+
+        <section class="right-side">
+            <div class="friends">
+                <% if(profile[0].profile_id === me[0].profile_id) { %>
+                    <h3>Meus amigos (<%= me[0].friends %>)</h3>
+                    
+                    <!-- fazer verificação de amigos caso tenha algum -->
+                    <!-- Mensagem temporaria. -->
+                    <div class="no-friends">
+                        <p>Parece que você não tem nenhum amigo, adicione alguns agora mesmo!</p>
+                    </div>
+
+                    <div class="grid">
+                        <div class="grid-content">
+
+                        </div>
+                    </div><!-- friends grid --> 
+                <% } else { %>
+                    <h3>Amigos (<%= profile[0].friends %>)</h3>
+                    
+                    <!-- fazer verificação de amigos caso tenha algum -->
+                    <!-- Mensagem temporaria. -->
+                    <div class="no-friends">
+                        <p>Parece que ele não possui nenhum amigo, Seja amigo dele(a)!</p>
+                    </div>
+
+                    <div class="grid">
+                        <div class="grid-content">
+
+                        </div>
+                    </div><!-- friends grid --> 
+                <% } %>
+            </div><!-- friends tab -->
+
+            <div class="community">
+                <% if(profile[0].profile_id === me[0].profile_id) { %>
+                    <h3>Minhas comunidades (0)</h3>
+                    
+                    <!-- fazer verificação de comunidades caso tenha alguma -->
+                    <!-- Mensagem temporaria. -->
+                    <div class="no-community">
+                        <p>Parece que você não tem nenhum amigo, adicione alguns agora mesmo!</p>
+                    </div>
+
+                    <!--<div class="grid">
+                        <div class="grid-content">
+
+                        </div>
+                    </div> friends grid -->
+                <% } else { %>
+                    <h3>Comunidades (0)</h3>
+                    
+                    <!-- fazer verificação de comunidades caso tenha alguma -->
+                    <!-- Mensagem temporaria. -->
+                    <div class="no-community">
+                        <p>Seu amigo não participa de nenhuma comunidade.</p>
+                    </div>
+
+                    <!--<div class="grid">
+                        <div class="grid-content">
+
+                        </div>
+                    </div> friends grid -->
+                <% } %>
+            </div><!-- community tab -->
+        </section><!-- Friends & community -->
+    </main>
+
+    <script>
+        // Buscar por usuarios para add.
+        function sendSearchForm(event){
+            event.stopPropagation();
+            let warning = document.getElementById("warnings");
+            
+            // input
+            const find_user = document.getElementById("find-user").value;
+            console.log(find_user);
+
+            // ajax para atualziar conteudo janela
+            $.ajax({
+                url: '/searchUser?q=' + find_user,
+                method: "GET",
+                success: function(data) {
+                    // Abre a janela
+                    Menu(event);
+
+                    // Atualizar o conteúdo do elemento com a resposta do servidor
+                    $("#show-results").html(data);
+                },
+                error: function(data) {
+                    warning.innerHTML = data.responseText;
+                }
+            });
+        }
+
+        /* Função que ativa a janela */
+        function Menu(event) {
+            event.stopPropagation(); // Evita a propagação do evento click para window.onclick
+            var dropdown = document.getElementById("world-dropdown");
+            dropdown.classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+            var dropdowns = document.getElementsByClassName("search-window");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

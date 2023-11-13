@@ -39,8 +39,8 @@ body{
 header nav{
     background: rgb(45,114,253);
     background: linear-gradient(0deg, rgba(45,114,253,1) 0%, rgba(39,146,222,1) 34%, rgba(39,146,222,1) 78%, rgba(45,114,253,1) 100%);
-    height: 38px;
-    padding: 0px 5%;
+    height: 40px;
+    padding: 0px 4%;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -51,7 +51,7 @@ header nav > .left {
 }
 
 header nav > .left > a > img{
-    width: 115px;
+    width: 117px;
     height: auto;
     padding: 7px 13px 7px 10px;
     background: rgb(217,217,217);
@@ -82,8 +82,52 @@ header nav > .right > a:hover{
 
 header nav > .right{
     color: rgb(30, 31, 139);
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: auto;
     font-size: 16px;
     font-weight: 600;
+}
+
+header nav > .right > .search-user{
+    display: flex;
+    margin-left: 10px;
+    border: 1px solid rgba(0, 0, 0, 0);
+    padding: 3px 5px;
+    background-color: rgb(104, 106, 207);
+    border-radius: 50px;
+    width: 240px;
+    justify-content: center;
+}
+
+header nav > .right > .search-user form > input{
+    height: 25px;
+    padding-left: 8px;
+    width: 180px;
+    border-radius: 5px;
+    border: 1px solid black;
+}
+
+header nav > .right > .search-user > a{
+    border: 1px solid black;
+    background-color: var(--regwindow-back-color);
+    padding: 2px;
+    width: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+    border-radius: 10px;
+    z-index: 1;
+    cursor: pointer;
+    transition: 0.1s ease-in;
+}
+header nav > .right > .search-user > a:hover{
+    background-color: rgb(218, 218, 218);
+    transition: 0.1s ease-out;
 }
 
 header nav > .right > span{
@@ -91,9 +135,10 @@ header nav > .right > span{
 }
 /* -------------------------------------------------------- */
 main{
-    padding: 15px 5%;
+    padding: 15px;
     display: grid;
-    grid-template-columns: 190px auto 320px;
+    grid-template-columns: 190px 745px 290px;
+    justify-content: center;
 }
 
 main section.left-side{
@@ -136,15 +181,13 @@ main section.left-side > .info-area{
     position: relative;
 }
 
-main section.left-side > .info-area > a{
+main section.left-side > .info-area > span{
     font-size: 18px;
-    font-weight: 500;
-    text-decoration: none;
-    color: var(--buttons-theme);
+    font-weight: 600;
 }
+
 main section.left-side > .info-area > a:hover,
-main section.left-side > .info-area > .edit-profile > .grid-content > a:hover,
-main section.left-side > .links > .grid > .grid-content > a:hover{
+main section.left-side > .info-area > .edit-profile > .grid-content > a:hover{
     color: var(--links-hover-theme);
 }
 
@@ -177,6 +220,7 @@ main section.left-side > .links > .grid > .grid-content > img{
 main section.left-side > .info-area > .edit-profile > .grid-content > a,
 main section.left-side > .links > .grid > .grid-content > a{
     text-decoration: none;
+    color: rgb(39, 39, 255);
 }
 
 main section.left-side > .links{
@@ -203,13 +247,17 @@ main section.feed > .warning{
     width: 100%;
     margin-bottom: 13px;
     padding-left: 10px;
-    background-color: rgb(243, 173, 173);
+    background-color: rgb(255, 243, 176);
     box-shadow: rgba(17, 17, 17, 0.3) 0px 2px 4px 0px;
     align-items: center;
     font-size: 15px;
     font-weight: 500;
-    color: rgb(255, 255, 255);
 }
+main section.feed > .warning > #warnings{
+    margin-left: 5px;
+    color: rgb(0, 0, 0);
+}
+
 main section.feed > .text-area{
     width: 100%;
     height: auto;
@@ -223,11 +271,11 @@ main section.feed > .text-area{
 main section.feed > .text-area > h1{
     margin-bottom: 10px;
 }
-main section.feed > .text-area > .buttons{
+main section.feed > .text-area form> .buttons{
     margin-top: 10px;
 }
-main section.feed > .text-area > .buttons > button,
-main section.feed > .social-feed > .post > .post_info > .responses > .comment-area > .buttons > button{
+main section.feed > .text-area form> .buttons > button,
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .comment-area form> .buttons > button{
     width: 85px;
     padding: 4px;
     font-size: 17px;
@@ -241,12 +289,45 @@ main section.feed > .social-feed > .post > .post_info > .responses > .comment-ar
     transition: 0.1s ease-in;
 }
 
+
 main section.feed > .text-area > .buttons > button:hover,
-main section.feed > .social-feed > .post > .post_info > .responses > .comment-area > .buttons > button:hover{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .comment-area form > .buttons > button:hover{
     border: 1px solid var(--buttons-theme-border);
     background: var(--buttons-theme-hover);
     color: white;
     transition: 0.1s ease-out;
+}
+
+main section.feed > .text-area form > #fileInput,
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .comment-area form > #fileInput{
+    display: none;
+}
+main section.feed > .text-area form > #customButton,
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .comment-area form > #customButton{
+    position: absolute;
+    margin-top: -105px;
+    margin-left: 465px;
+    width: 30px;
+    padding: 2px;
+    border: 0px;
+    border-radius: 4px;
+}
+
+main section.feed > .text-area form > #fileList{
+    padding: 0;
+    font-size: 11px;
+    border: none;
+    display: flex;
+    
+}
+
+main section.feed > .text-area form > #fileList > div{
+    padding-right: 10px;
+}
+
+main section.feed > .text-area form > #customButton:hover,
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .comment-area form > #customButton:hover{
+    border: 1px solid black;
 }
 /* ------------------------------------------------------------------------------ */
 
@@ -265,30 +346,37 @@ main section.feed > .social-feed > h2{
     margin-bottom: 10px;
 }
 
-main section.feed > .social-feed > .post{
+
+main section.feed > .social-feed > .scroll-feed {
+    margin-top: 40px;
+    height: 600px;
+    overflow: auto;
+}
+
+main section.feed > .social-feed > .scroll-feed > .post{
     margin: 20px 0px;
     display: flex;
 }
 
-main section.feed > .social-feed > .post > img{
+main section.feed > .social-feed > .scroll-feed > .post > img{
     width: 60px;
     height: 60px;
     margin-right: 15px;
 }
 
-main section.feed > .social-feed > .post > .post_info{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info{
     width: 100%;
 }
 
-main section.feed > .social-feed > .post > .post_info > .top > a,
-main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right > .top > a{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .top > a,
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .sub-comments > .content > .right > .top > a{
     text-decoration: none;
     font-size: 16px;
     font-weight: 500;
     margin-right: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right > .top > a.last{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .sub-comments > .content > .right > .top > a.last{
     text-decoration: underline;
     font-size: 15px;
     font-weight: 400;
@@ -296,65 +384,98 @@ main section.feed > .social-feed > .post > .post_info > .responses > .sub-commen
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-main section.feed > .social-feed > .post > .post_info > .content,
-main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right > p{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .content,
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .sub-comments > .content > .right > p{
     margin: 5px 0px;
-    width:  85%;
+    width:  100%;
+    font-size: 15px;
+}
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .sub-comments > .content > .right > p{
+    margin: 5px 0px;
+    width:  100%;
     font-size: 15px;
 }
 
-main section.feed > .social-feed > .post > .post_info > .top > span,
-main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right > .top  > span{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .top > span,
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .sub-comments > .content > .right > .top  > span{
     font-size: 12px;
 }
 
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .content > .files{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 35px;
+    width: 100%;
+    align-items: center;
+}
 
-main section.feed > .social-feed > .post > .post_info > .options > a{
-    text-decoration: underline;
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .content > .files > img{
+    padding-right: 10px;
+    width: 360px;
+    height: 290px;
+    margin: 10px;
+}
+
+
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .options {
+
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    height: 30px;
+}
+
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .options > a{
+    text-decoration: none;
     font-size: 16px;
     margin-right: 20px;
+    font-weight: 500;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-main section.feed > .social-feed > .post > .post_info > .options > a.last{
+
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .options > button.last{
+    border: 0px;
+    cursor: pointer;
     margin-right: 5px;
+    height: 10px;
 }
 
-main section.feed > .social-feed > .post > .post_info > .responses {
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses {
     margin: 19px 0px 11px 0px;
 }
 
-main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .sub-comments > .content{
     display: flex;
     margin-bottom: 10px;
 }
 
-main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > .right{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .sub-comments > .content > .right{
     width: 100%;
 }
 
-main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments > .content > img{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .sub-comments > .content > img{
     width: 45px;
     height: 30px;
     padding-right: 10px;
 }
 
-main section.feed > .social-feed > .post > .post_info > .responses > .sub-comments{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .sub-comments{
     padding-left: 15px;
     display: flex;
     flex-direction: column;
 }
 
-main section.feed > .social-feed > .post > .post_info > .responses > .comment-area{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .comment-area{
     margin-top: 10px;
     display: none;
 }
 
-main section.feed > .social-feed > .post > .post_info > .responses > .comment-area form{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .comment-area form{
     margin-bottom: 7px;
 }
 
-main section.feed > .social-feed > .no-scraps{
+main section.feed > .social-feed > .scroll-feed > .no-scraps{
     display: flex;
     flex-wrap: nowrap;
     justify-content: center;
@@ -362,7 +483,7 @@ main section.feed > .social-feed > .no-scraps{
     height: 100%;
 }
 
-main section.feed > .social-feed > .no-scraps > p{
+main section.feed > .social-feed > .scroll-feed > .no-scraps > p{
     width: 450px;
     color: var(--small-span-color);
 }
@@ -415,6 +536,56 @@ main section.right-side > .community > .no-community > p{
 }
 
 /* ----------------------- toggles ---------------------------------*/
-main section.feed > .social-feed > .post > .post_info > .responses > .comment-area.show-textarea{
+main section.feed > .social-feed > .scroll-feed > .post > .post_info > .responses > .comment-area.show-textarea{
     display: block;
+}
+
+main .search-window{
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 50px;
+    right: 65px;
+    width: 280px;
+    min-height: 100px;
+    max-height: 400px;
+    padding: 10px 20px;
+    overflow-y: auto;
+    box-shadow: rgba(49, 49, 49, 0.664) 0px 3px 7px 2px;
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+main .search-window > .results{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+main .search-window > .results > a{
+    text-decoration: none;
+    height: 52px;
+    margin: 10px 0px;
+    color: black;
+    background-color: rgb(255, 255, 255);
+    transition: 0.1s ease-in;
+}
+
+main .search-user > .search-window > .results > a:hover{
+    background-color: rgb(235, 235, 235);
+    transition: 0.1s ease-in;
+}
+
+header nav > .right > .search-user > .search-window > .results > a > .content{
+    display: flex;
+    align-items: center;
+}
+
+header nav > .right > .search-user > .search-window > .results > a > .content > img{
+    width: 50px;
+    height: 52px;
+    margin-right: 15px;
+}
+
+header nav > .right > .search-user > .search-window.show{
+    display: flex;
 }

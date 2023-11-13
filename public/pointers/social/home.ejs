@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orkut - Home</title>
     <link rel="stylesheet" href="home.css">
+    <link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
     <script src="/ckeditor.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <header>
@@ -24,18 +26,38 @@
             <div class="right">
                 <span><%= db[0].email %></span>
                 <a href="/Logout">Sair</a>
+                
+                <div class="search-user">
+                    <form id="searchForm">
+                        <input type="text" name="find-user" id="find-user" placeholder="Procurar usuario" required />
+                    </form>
+                    <a onclick="sendSearchForm(event);" id="search"><img src="/icons/loupe.png" alt=""></a>
+
+                </div>
             </div>
         </nav>
     </header><!-- Orkut header -->
 
     <main>
+        <!-- search popup -->
+        <div class="search-window" id="world-dropdown">
+            <div class="results" id="show-results">
+                <a href="#">
+                    <div class="content">
+                        <img src="/photos/default_photo.png" alt="">
+                        <span>nome aqui</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
         <section class="left-side">
             <div class="photo">
                 <img src="<%= db[0].photo %>" alt="" />
             </div><!-- Profile photo area -->
             <hr>
             <div class="info-area">
-                <a href="/Profile?id=<%= db[0].profile_id %>"><%= db[0].first_name %></a><br>
+                <span><%= db[0].first_name %></span><br>
                 
                 <div class="quick">
                     <% if(db[0].gender == 0) var gender_name = "Masculino"; else var gender_name = "Feminino";%>
@@ -66,32 +88,32 @@
                 <div class="grid">
                     <div class="grid-content">
                         <img src="/icons/profile_ico.png" alt="" />
-                        <a href="/Profile?id=<%= db[0].profile_id %>">perfil</a>
+                        <a href="/Profile?id=<%= db[0].profile_id %>">meu perfil</a>
                     </div>
                     
                     <div class="grid-content">
                         <img src="/icons/scraps_ico.png" alt="" />
-                        <a href="/Scraps">recados</a>
+                        <a href="/Scraps?id=<%= db[0].profile_id %>">recados</a>
                     </div>
 
                     <div class="grid-content">
                         <img src="/icons/photos_ico.png" alt="" />
-                        <a href="/Photos">fotos</a>
+                        <a href="/Photos?id=<%= db[0].profile_id %>">fotos</a>
                     </div>
 
                     <div class="grid-content">
                         <img src="/icons/videos_ico.png" alt="" />
-                        <a href="/Videos">vídeos</a>
+                        <a href="/Videos?id=<%= db[0].profile_id %>">vídeos</a>
                     </div>
 
                     <div class="grid-content">
                         <img src="/icons/depoiments_ico.png" alt="" />
-                        <a href="/Depoiments">depoimentos</a>
+                        <a href="/Depoiments?id=<%= db[0].profile_id %>">depoimentos</a>
                     </div><br>
 
                     <div class="grid-content">
                         <img src="/icons/options_ico.png" alt="" />
-                        <a href="/Options">opções</a>
+                        <a href="/Options?id=<%= db[0].profile_id %>">opções</a>
                     </div>
                 </div><!-- grid for links -->
             </div><!-- Social links -->
@@ -99,100 +121,119 @@
 
         <section class="feed">
             <!-- Advice banner -->
-            <% if(msg != "") { %>
-                <div class="warning">
-                    <span><span style="color: rgb(255, 255, 22); font-size: 17px;">Aviso:</span> <%= msg %></span>
-                </div>
-            <% } else { 
-                var normal_msg = "Orkut Flat! - Versão de portfolio v0.2." %>
-                <div class="warning">
-                    <span><span style="color: rgb(255, 255, 22); font-size: 17px;">Aviso:</span> <%= normal_msg %></span>
-                </div>
-            <%}%>
+            <div class="warning">
+                <span style="color: rgb(248, 17, 0); font-size: 17px;">Aviso: </span><span id="warnings">Orkut Flat! - Versão de portfolio v0.2.</span>
+            </div>
 
             <div class="text-area">
-                <form action="/makePost" method="post" name="make-post" id="make-post">
-                    <textarea name="postcontent" id="postcontent" cols="30" rows="10" required></textarea>
+                <form enctype="multipart/form-data" id="make-post">
+                    <textarea name="postcontent" id="postcontent"></textarea>
+                    <input type="file" name="file" id="fileInput" accept="image/jpeg, image/png, video/mp4" multiple>
+                    <button type="button" id="customButton" title="Upload Image / Video">📤</button>
+                    <div id="fileList"></div>
+
+                    <div class="buttons" id="buttons" style="display: none;">
+                        <button type="button" onclick="sendMakePostForm(event);">Postar</button>
+                        <button type="button" onclick="CKEDITOR.instances.postcontent.setData( '', function() { this.updateElement(); } );">Cancelar</button>
+                    </div>
                 </form>
-                
-                <div class="buttons" id="buttons" style="display: none;">
-                    <button type="submit" form="make-post">Postar</button>
-                    <button onclick="CKEDITOR.instances.postcontent.setData( '', function() { this.updateElement(); } );">Cancelar</button>
-                </div>
             </div><!-- post area -->
 
             <div class="social-feed">
                 <h2>Feed principal</h2>
 
-                <% if(no_posts) { %>
-                <div class="no-scraps">
-                    <p>Adicione amigos ou faça um post usando emojis, imagens, vídeos, #hashtags, e muito mais!</p>
-                </div>
-
-                <% } else { 
-                for(post of posts) { %>
-                <div class="post" id="<%= post.postID %>">
-                    <img src="<%= post.user_photo %>" alt="" />
-
-                    <div class="post_info">
-                        <div class="top">
-                            <a href="/Profile?id=<%= post.from_user %>"><%= post.name %></a>
-                            <span><%= post.posted_when %></span>
+                <div class="scroll-feed" id="scroll-feed">
+                    <% if(no_posts) { %>
+                        <div class="no-scraps">
+                            <p>Adicione amigos ou faça um post usando emojis, imagens, vídeos, #hashtags, e muito mais!</p>
                         </div>
-
-                        <div class="content">
-                            <p><%- post.text %></p>
-                        </div>
-
-                        <div class="options">
-                            <a href="javascript:openComment(<%= post.postID %>);">Responder</a>
-                            <a href="javascript:like();" class="last">Gostei</a>(<%= post.likes %>)
-                        </div>
-
-                        <div class="responses">
-                            <div class="sub-comments">
-                                <% for(comm of pComments) { 
-                                    if(comm.postID === post.postID) { %>
-                                    <div class="content">
-                                        <img src="<%= comm.user_photo %>" alt="" />
-
-                                        <div class="right">
-                                            <div class="top">
-                                                <a href="/Profile?id=<%= comm.user_id %>"><%= comm.name %></a>
-                                                <span><%= comm.posted_when %></span>
-                                                <a href="javascript:void(0);" class="last">Gostei</a>(<%= comm.likes %>)
-                                            </div>
         
-                                            <p><%- comm.text %></p>
-                                        </div>
-                                    </div>
-                                <% }
-                                }%>
-                            </div>
-
-                            <div class="comment-area" id="c-area-<%= post.postID %>">
-                                <form action="/commentPost?q=<%= post.postID %>" method="post" name="sub-com-<%= post.postID %>" id="sub-com-<%= post.postID %>">
-                                    <textarea name="response-<%= post.postID %>" id="response-<%= post.postID %>" cols="30" rows="10"></textarea>
-                                    
-                                </form>
-
-                                <div class="buttons" id="buttons-comment" style="display: block;">
-                                    <button type="submit" form="sub-com-<%= post.postID %>">Postar</button>
-                                    <button onclick="resetField('<%= post.postID %>'); openComment('<%= post.postID %>');">Cancelar</button>
+                        <% } else { 
+                        for(post of posts) { %>
+                        <div class="post" id="<%= post.postID %>">
+                            <img src="<%= post.user_photo %>" alt="" />
+        
+                            <div class="post_info">
+                                <div class="top">
+                                    <a href="/Profile?id=<%= post.from_user %>"><%= post.name %></a>
+                                    <span><%= post.posted_when %></span>
                                 </div>
+        
+                                <div class="content">
+                                    <p><%- post.text %></p>
+        
+                                    <div class="files">
+                                        <% for(photo of imgs) { %>
+                                            <% if(photo.post_id === post.postID) { %>
+                                                <% if(photo.image != "") { %>
+                                                <img src="<%= photo.image %>" alt="" width="100%"/> 
+                                                <% } else if(photo.video != "") { %>
+                                                <video src="<%= photo.video %>" controls width="230px" height="250px"></video>
+                                                <% } %>
+                                            <% } %>
+                                        <% } %>
+                                    </div>
+                                </div>
+        
+                                <div class="options" id="options-<%= post.postID %>">
+                                    <a href="javascript:openComment(<%= post.postID %>);">Responder</a>
+                                    <% for(isLiked of isliked) { %>
+                                        <% if(db[0].profile_id === isLiked.user_id && isLiked.liked === 0 && isLiked.postID === post.postID) { %>
+                                            <button onclick="like('<%= post.likes %>', '<%= post.postID %>', 1);" class="last" id="_like_btn"><img src="/icons/not_liked.png" alt="" width="16px"/></button>(<span id="like-<%= post.postID %>"><%= post.likes %></span>)
+                                        <% } else if(db[0].profile_id === isLiked.user_id && isLiked.liked === 1 && isLiked.postID === post.postID) { %>
+                                            <button onclick="like('<%= post.likes %>', '<%= post.postID %>', 2);" class="last" id="_dislike_btn"><img src="/icons/Liked.png" alt="" width="16px"/></button>(<span id="like-<%= post.postID %>"><%= post.likes %></span>)
+                                        <% } %>
+                                    <% } %>
+                                </div>
+        
+                                <div class="responses">
+                                    <div class="sub-comments">
+                                        <% for(comm of pComments) { 
+                                            if(comm.postID === post.postID) { %>
+                                            <div class="content">
+                                                <img src="<%= comm.user_photo %>" alt="" />
+        
+                                                <div class="right">
+                                                    <div class="top">
+                                                        <a href="/Profile?id=<%= comm.user_id %>"><%= comm.name %></a>
+                                                        <span><%= comm.posted_when %></span>
+                                                        <!--<a href="javascript:void(0);" class="last">Gostei</a>(<%= comm.likes %>)
+                                                        [Option under development.]-->
+                                                    </div>
+                
+                                                    <p><%- comm.text %></p>
+                                                </div>
+                                            </div>
+                                        <% }
+                                        }%>
+                                    </div>
+        
+                                    <div class="comment-area" id="c-area-<%= post.postID %>">
+                                        <form action="/commentPost?q=<%= post.postID %>" method="post" name="sub-com-<%= post.postID %>" id="sub-com-<%= post.postID %>">
+                                            <textarea name="response-<%= post.postID %>" id="response-<%= post.postID %>" cols="30" rows="10"></textarea>
+                                            <!--<input type="file" id="fileInput" multiple>
+                                            <button type="button" id="customButton">Up</button> IMPLEMENTANDO [WIP] ] -->
+                                                <br>
+                                            <div class="buttons" id="buttons-comment" style="display: block;">
+                                                <button type="submit" form="sub-com-<%= post.postID %>">Postar</button>
+                                                <button type="button" onclick="resetField('<%= post.postID %>'); openComment('<%= post.postID %>');">Cancelar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+        
                             </div>
-                        </div>
-
-                    </div>
-                </div><!-- Post  -->
-                <% }
-                } %>
+                        </div><!-- Post  -->
+                        <% }
+                    } %>
+                </div>
+                
             </div><!-- Feed -->
         </section><!-- Social media feed section -->
 
         <section class="right-side">
             <div class="friends">
-                <h3>Meus amigos (0)</h3>
+                <h3>Meus amigos (<%= db[0].friends %>)</h3>
                 
                 <!-- fazer verificação de amigos caso tenha algum -->
                 <!-- Mensagem temporaria. -->
@@ -200,11 +241,11 @@
                     <p>Parece que você não tem nenhum amigo, adicione alguns agora mesmo!</p>
                 </div>
 
-                <!--<div class="grid">
+                <div class="grid">
                     <div class="grid-content">
 
                     </div>
-                </div> friends grid -->
+                </div><!-- friends grid --> 
             </div><!-- friends tab -->
 
             <div class="community">
@@ -225,57 +266,128 @@
         </section><!-- Friends & community -->
     </main><!-- Page -->
 
-    <!-- Replace textarea to ckeditor api-->
+    <script src="/homeSettings.js"></script>
+
     <script>
-        CKEDITOR.on('instanceReady', function(evt) {
-            var editor = evt.editor;
+        // formualrio de envio de post personalizado para burlar incompatibilidade com ckeditor.
+        function sendMakePostForm(event) {
+            event.stopPropagation();
+            const formData = new FormData();
+            const ckeditorContent = CKEDITOR.instances['postcontent'].getData();
+            formData.append('ckeditorContent', ckeditorContent);
+            let warning = document.getElementById("warnings");
+            let like_btn = document.getElementById("_like_btn");
+            const file = document.getElementById('fileInput').files;
 
-            // Se clicar aparece os botoes.
-            if(editor.name == "postcontent"){
-                editor.on('focus', function(e) {
-                    var div = document.getElementById("buttons");
-                    div.style.display = "block";
-                });
-
-                // se sair fora apaga.
-                editor.on('blur', function(e) {
-                    var div = document.getElementById("buttons");
-                    div.style.display = "none";
-                });
+            for (let i = 0; i < file.length; i++) {
+                formData.append('file', file[i]);
             }
-        });
+            console.log(ckeditorContent.length)
 
-        CKEDITOR.replace('postcontent',{
-            width: '97%',
-            height: 70,
-            editorplaceholder: 'Diga algo aos seus amigos ou poste fotos, vídeos ou outros links!',
-        });
-
-        // reseta / cancela o comentario pro id do post clicado.
-        function resetField(id)
-        {
-            var editor = CKEDITOR.instances['response-'+id];
-
-            if (editor) {
-                // Limpa o conteúdo do CKEditor
-                editor.setData('');
-                var div = document.getElementById("response-"+id);
-            }
+            fetch('/makePost', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                location.reload(); // Recarrega a página após o envio bem-sucedido.
+            })
+            .catch(error => {
+                warning.innerHTML = " Erro ao postar.";
+            });
         }
 
-        // Abre o comentario pro id do post clicado.
-        function openComment(id){
-                var div = document.getElementById("c-area-"+id);
-                div.classList.toggle("show-textarea");
-                if(window.getComputedStyle(document.querySelector('#c-area-'+id)).display === "block") 
-                { document.getElementById("c-area-"+id).scrollIntoView(); }
+        // Dar like em post.
+        function like(likes, postID, opt)
+        {
+            // pegando botao do like
+            const formData = new FormData();
+            const id = postID;
+            let like_elem = document.getElementById("like-"+ postID);
+            let likesAtual = parseInt(likes);
 
-                // substitui o textarea do post clicado pelo editor da api.
-                CKEDITOR.replace( 'response-'+id, {
-                    width: '100%',
-                    height: 70,
-                    editorplaceholder: 'Diga algo aos seus amigos ou poste fotos, vídeos ou outros links!',
+            fetch('/likePost?q='+ id + "&opt=" + opt, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+
+                // Trocando inner de acordo com a opção passada.
+                if(opt === 1)
+                {
+                    var totalLikes = likesAtual+1;
+                    like_elem.innerHTML = totalLikes;
+                }
+                else 
+                {
+                    var totalLikes = likesAtual-1;
+                    like_elem.innerHTML = totalLikes;
+                }
+
+                // Atualizando parte da pagina.
+                $.ajax({
+                    url: "/attLikes?q="+ id,
+                    method: "GET",
+                    success: function(data) {
+                        // Atualizar o conteúdo do elemento com a resposta do servidor
+                        $("#options-"+ postID).html(data);
+                    },
+                    error: function() {
+                        console.log('erro na solicitação.');
+                    }
                 });
+            })
+            .catch(error => {
+                console.log('erro');
+            });
+        }
+
+        // Buscar por usuarios para add.
+        function sendSearchForm(event){
+            event.stopPropagation();
+            let warning = document.getElementById("warnings");
+            
+            // input
+            const find_user = document.getElementById("find-user").value;
+            console.log(find_user);
+
+            // ajax para atualziar conteudo janela
+            $.ajax({
+                url: '/searchUser?q=' + find_user,
+                method: "GET",
+                success: function(data) {
+                    // Abre a janela
+                    Menu(event);
+
+                    // Atualizar o conteúdo do elemento com a resposta do servidor
+                    $("#show-results").html(data);
+                },
+                error: function(data) {
+                    warning.innerHTML = data.responseText;
+                }
+            });
+        }
+    </script>
+
+    <script>
+        /* Função que ativa a janela */
+        function Menu(event) {
+            event.stopPropagation(); // Evita a propagação do evento click para window.onclick
+            var dropdown = document.getElementById("world-dropdown");
+            dropdown.classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+            var dropdowns = document.getElementsByClassName("search-window");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
         }
     </script>
 </body>
