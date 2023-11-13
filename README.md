@@ -11,7 +11,7 @@ o projeto vem com um arquivo .sql com toda a modelagem de dados feita.
 
 ```bash
 # Clone o projeto
-$ git clone https://github.com/maurodesouza/profile-readme-generator
+$ git clone https://github.com/CodedBytes/orkut-flat.git
 
 # importe o arquivo .sql usando o phpmyadmin ou o proprio workbench.
 
