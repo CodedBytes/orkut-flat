@@ -15,18 +15,15 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name: 'editing', groups: [ 'find', 'selection', 'spellchecker', 'editing' ] },
 		{ name: 'forms', groups: [ 'forms' ] },
 		{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
-		{ name: 'paragraph', groups: [ 'list', 'blocks', 'align', 'bidi', 'paragraph' ] },
+		{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi', 'paragraph' ] },
 		{ name: 'links', groups: [ 'links' ] },
 		{ name: 'insert', groups: [ 'insert' ] },
 		{ name: 'styles', groups: [ 'styles' ] },
 		{ name: 'colors', groups: [ 'colors' ] },
-		{ name: 'tools', groups: [ 'tools' ] },
-		{ name: 'others', groups: [ 'others' ] },
-		{ name: 'about', groups: [ 'about' ] }
 	];
-	config.removeButtons = 'Source,Save,NewPage,ExportPdf,Preview,Print,Templates,Cut,PasteText,PasteFromWord,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,Subscript,Superscript,CopyFormatting,RemoveFormat,BulletedList,Outdent,Indent,Blockquote,CreateDiv,JustifyLeft,JustifyCenter,JustifyRight,JustifyBlock,BidiLtr,BidiRtl,Language,Anchor,Table,HorizontalRule,SpecialChar,PageBreak,Iframe,Styles,Format,Maximize,ShowBlocks,About,NumberedList';
-	config.extraPlugins = 'editorplaceholder,emoji';
 
+	//config.removeButtons = 'Save,Source,NewPage,ExportPdf,Preview,Image,Flash,Templates,Print,Cut,PasteText,PasteFromWord,Find,Replace,SelectAll,Form,Checkbox,TextField,Textarea,Select,Button,imagebutton,HiddenField,Subscript,Superscript,CopyFormatting,RemoveFormat,BulletedList,NumberedList,Outdent,Indent,CreateDiv,Blockquote,JustifyLeft,JustifyCenter,JustifyRight,JustifyBlock,BidiRtl,BidiLtr,Anchor,image,Table,HorizontalRule,SpecialChar,PageBreak,Iframe,Maximize,About,ShowBlocks,Undo,Redo,Format,Styles,Paste,Copy';
+	config.extraPlugins = 'editorplaceholder,emoji,font';
 	// Set the most common block elements.
 	config.format_tags = 'p;h1;h2;h3;pre';
 
