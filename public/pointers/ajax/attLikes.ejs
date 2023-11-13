@@ -1,0 +1,87 @@
+<!-- Options -->
+<head>
+    <style>
+        .options {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            height: 30px;
+        }
+
+        .options > a{
+            text-decoration: none;
+            font-size: 16px;
+            margin-right: 20px;
+            font-weight: 500;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .options > button.last{
+            border: 0px;
+            cursor: pointer;
+            margin-right: 5px;
+            height: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="options" id="options-<%= posts[0].postID %>">
+        <a href="javascript:openComment(<%= posts[0].postID %>);">Responder</a>
+        <% for(isLiked of isliked) { %>
+            <% if(db[0].profile_id === isLiked.user_id && isLiked.liked === 0 && isLiked.postID === posts[0].postID) { %>
+                <button onclick="like('<%= posts[0].likes %>', '<%= posts[0].postID %>', 1);" class="last" id="_like_btn"> <img src="/icons/not_liked.png" alt="" width="16px"/> </button>(<span id="like-<%= posts[0].postID %>"><%= posts[0].likes %></span>)
+            <% } else if(db[0].profile_id === isLiked.user_id && isLiked.liked === 1 && isLiked.postID === posts[0].postID) { %>
+                <button onclick="like('<%= posts[0].likes %>', '<%= posts[0].postID %>', 2);" class="last" id="_dislike_btn"> <img src="/icons/liked.png" alt="" width="16px"/> </button>(<span id="like-<%= posts[0].postID %>"><%= posts[0].likes %></span>)
+            <% } %>
+        <% } %>
+    </div>
+
+    <script>
+        // Dar like em post.
+        function like(likes, postID, opt)
+        {
+            // pegando botao do like
+            const formData = new FormData();
+            const id = postID;
+            let like_elem = document.getElementById("like-"+postID);
+            let likesAtual = parseInt(likes);
+
+            fetch('/likePost?q='+ id + "&opt=" + opt, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+
+                // Trocando inner de acordo com a opção passada.
+                if(opt === 1)
+                {
+                    var totalLikes = likesAtual+1;
+                    like_elem.innerHTML = totalLikes;
+                }
+                else 
+                {
+                    var totalLikes = likesAtual-1;
+                    like_elem.innerHTML = totalLikes;
+                }
+
+                // Atualizando parte da pagina.
+                $.ajax({
+                    url: "/attLikes?q="+ id,
+                    method: "GET",
+                    success: function(data) {
+                        // Atualizar o conteúdo do elemento com a resposta do servidor
+                        $("#options-"+ postID).html(data);
+                    },
+                    error: function() {
+                        console.log('erro na solicitação.');
+                    }
+                });
+            })
+            .catch(error => {
+                console.log('erro');
+            });
+        }
+    </script>
+</body>
