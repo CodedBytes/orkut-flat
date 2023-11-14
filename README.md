@@ -26,7 +26,7 @@ Discord : [WebDev] YuutoX -> yuuto.x
 
 ## :memo: License ##
 
-Este propjetoe sta licensidao sob a licensa MIT, em caso de duvidas consulte o arquivo [LICENSE](LICENSE.md) .
+Este projeto está licensiado sob a licensa MIT, em caso de duvidas consulte o arquivo [LICENSE](LICENSE.md) .
 
 
 Feito por : <a href="https://github.com/CodedByTES" target="_blank">João Victor(CodedBytes)</a>
